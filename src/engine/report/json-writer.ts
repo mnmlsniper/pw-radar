@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import type { CoverageResults } from "../results.js";
 
-export const DEFAULT_JSON_FILENAME = "swagger-coverage-results.json";
+export const DEFAULT_JSON_FILENAME = "pw-radar-results.json";
 
 /** Writes the full results model as pretty JSON. */
 export function writeJsonReport(

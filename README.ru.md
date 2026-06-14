@@ -1,4 +1,4 @@
-# swagger-coverage-ts
+# pw-radar
 
 Покрытие API-тестами относительно OpenAPI/Swagger-спецификации — TypeScript-порт
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), без необходимости в JVM.
@@ -20,7 +20,7 @@
 ## Установка
 
 ```bash
-npm install -D swagger-coverage-ts
+npm install -D pw-radar
 ```
 
 Node ≥ 18. `@playwright/test` — опциональная peer-зависимость (нужна только логгеру).
@@ -31,7 +31,7 @@ Node ≥ 18. `@playwright/test` — опциональная peer-зависим
 
 ```js
 import { test as base } from '@playwright/test';
-import { recordContext } from 'swagger-coverage-ts/playwright';
+import { recordContext } from 'pw-radar/playwright';
 import { Api } from '../api/api.js';
 
 export const test = base.extend({
@@ -62,7 +62,7 @@ content-type и **имена** полей верхнего уровня (для 
 ## 2. Сборка отчёта
 
 ```bash
-npx swagger-coverage-ts -s openapi.yaml -i coverage-output
+npx pw-radar -s openapi.yaml -i coverage-output
 ```
 
 ```
@@ -78,7 +78,7 @@ npx swagger-coverage-ts -s openapi.yaml -i coverage-output
   -h, --help
 ```
 
-На выходе — `swagger-coverage-report.html` и `swagger-coverage-results.json`.
+На выходе — `pw-radar-report.html` и `pw-radar-results.json`.
 
 ### Базовый путь
 
@@ -86,7 +86,7 @@ npx swagger-coverage-ts -s openapi.yaml -i coverage-output
 `servers`/`basePath`), укажите префикс:
 
 ```bash
-npx swagger-coverage-ts -s openapi.yaml -i coverage-output -b /api/v1
+npx pw-radar -s openapi.yaml -i coverage-output -b /api/v1
 ```
 
 Когда в спеке есть `servers` или `basePath` (в т.ч. на уровне пути/операции), префиксы
@@ -95,7 +95,7 @@ npx swagger-coverage-ts -s openapi.yaml -i coverage-output -b /api/v1
 ### Удалённая спека с авторизацией
 
 ```bash
-npx swagger-coverage-ts -s https://host/openapi.json -i coverage-output \
+npx pw-radar -s https://host/openapi.json -i coverage-output \
   -H "Authorization: Bearer $TOKEN"
 ```
 

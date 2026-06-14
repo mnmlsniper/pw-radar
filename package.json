@@ -14,8 +14,16 @@
     "pw"
   ],
   "bin": {
-    "swagger-coverage-ts": "./dist/cli/index.js"
+    "pw-radar": "dist/cli/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnmlsniper/pw-radar.git"
+  },
+  "homepage": "https://github.com/mnmlsniper/pw-radar#readme",
+  "bugs": { "url": "https://github.com/mnmlsniper/pw-radar/issues" },
+  "author": "mnmlsniper",
+  "publishConfig": { "access": "public" },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -31,6 +39,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:watch": "node --import tsx --watch --test tests/*.test.ts",

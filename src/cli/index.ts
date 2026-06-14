@@ -9,10 +9,10 @@ import { DEFAULT_JSON_FILENAME, writeJsonReport } from "../engine/report/json-wr
 import { DEFAULT_HTML_FILENAME, writeHtmlReport } from "../engine/report/html-writer.js";
 import { logSummary } from "../engine/report/log-writer.js";
 
-const USAGE = `swagger-coverage-ts — API coverage report from an OpenAPI/Swagger spec
+const USAGE = `pw-radar — API coverage report from an OpenAPI/Swagger spec
 
 Usage:
-  swagger-coverage-ts -s <spec> -i <input> [options]
+  pw-radar -s <spec> -i <input> [options]
 
 Options:
   -s, --spec <path|url>   Path or URL to the OpenAPI/Swagger specification (required)

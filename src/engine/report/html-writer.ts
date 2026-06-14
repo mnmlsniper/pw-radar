@@ -6,7 +6,7 @@ import type {
 } from "../results.js";
 import { formatNumber } from "./number-format.js";
 
-export const DEFAULT_HTML_FILENAME = "swagger-coverage-report.html";
+export const DEFAULT_HTML_FILENAME = "pw-radar-report.html";
 
 type Locale = "en" | "ru";
 

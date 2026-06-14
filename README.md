@@ -1,4 +1,4 @@
-# swagger-coverage-ts
+# pw-radar
 
 API test coverage against an OpenAPI/Swagger specification — a TypeScript port of
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), with no JVM required.
@@ -20,7 +20,7 @@ The tool has two decoupled halves connected only through a `coverage-output/` fo
 ## Install
 
 ```bash
-npm install -D swagger-coverage-ts
+npm install -D pw-radar
 ```
 
 Node ≥ 18. `@playwright/test` is an optional peer dependency (only needed for the logger).
@@ -31,7 +31,7 @@ Wrap the request context in your fixture with `recordContext`:
 
 ```js
 import { test as base } from '@playwright/test';
-import { recordContext } from 'swagger-coverage-ts/playwright';
+import { recordContext } from 'pw-radar/playwright';
 import { Api } from '../api/api.js';
 
 export const test = base.extend({
@@ -62,7 +62,7 @@ top-level response field *names* (for the `only-declared-response-field` rule).
 ## 2. Build the report
 
 ```bash
-npx swagger-coverage-ts -s openapi.yaml -i coverage-output
+npx pw-radar -s openapi.yaml -i coverage-output
 ```
 
 ```
@@ -80,7 +80,7 @@ Options:
 
 > **Russian docs:** see [README.ru.md](README.ru.md).
 
-Outputs `swagger-coverage-report.html` and `swagger-coverage-results.json`.
+Outputs `pw-radar-report.html` and `pw-radar-results.json`.
 
 ### Base path
 
@@ -88,7 +88,7 @@ If your spec declares paths like `/products` but the API is served under `/api/v
 (no `servers`/`basePath` in the spec), tell the matcher the prefix:
 
 ```bash
-npx swagger-coverage-ts -s openapi.yaml -i coverage-output -b /api/v1
+npx pw-radar -s openapi.yaml -i coverage-output -b /api/v1
 ```
 
 (When the spec has `servers` or `basePath`, prefixes are detected automatically.)
