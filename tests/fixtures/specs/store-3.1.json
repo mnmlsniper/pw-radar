@@ -1,0 +1,50 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Store 3.1", "version": "1.0.0" },
+  "servers": [{ "url": "https://api.test/v1" }],
+  "paths": {
+    "/items/{id}": {
+      "get": {
+        "tags": ["items"],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } },
+          { "name": "kind", "in": "query", "schema": { "type": ["string", "null"], "enum": ["a", "b"] } }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer" },
+                    "name": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/items": {
+      "post": {
+        "tags": ["items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  { "type": "object", "properties": { "name": { "type": "string" } }, "required": ["name"] },
+                  { "type": "object", "properties": { "status": { "type": "string", "enum": ["on", "off"] } } }
+                ]
+              }
+            }
+          }
+        },
+        "responses": { "201": {} }
+      }
+    }
+  }
+}

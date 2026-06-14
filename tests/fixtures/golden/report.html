@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snapshot Shop — Swagger Coverage Report</title>
+<style>
+/* Teenage Engineering inspired: warm grey, black, signature orange, LED dots, monospace data */
+:root{
+  --full:#1faa59;--partial:#f59e00;--empty:#d92d1a;--deprecated:#9a958c;
+  --accent:#ff3b00;--bg:#d9d7d0;--panel:#eceae3;--card:#f6f5f1;--ink:#171614;--line:#171614;--soft:#8a857b;
+}
+*{box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink);
+  background-image:radial-gradient(var(--bg) 1px,transparent 1px);background-size:7px 7px}
+.mono{font-family:'SF Mono',ui-monospace,Menlo,Consolas,monospace}
+header{padding:18px 22px;background:var(--ink);color:#f6f5f1;display:flex;align-items:center;gap:14px;
+  border-bottom:3px solid var(--accent)}
+header .knob{width:34px;height:34px;border-radius:50%;background:var(--accent);
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 5px var(--accent);flex:0 0 auto}
+header h1{margin:0;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
+header .meta{margin-left:auto;font-size:11px;letter-spacing:.08em;color:#b9b4a8;text-transform:uppercase;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+main{max-width:1000px;margin:0 auto;padding:22px 22px 56px}
+section{margin-top:26px}
+
+/* summary as a device "display" panel */
+.summary{background:var(--ink);color:#f6f5f1;border-radius:10px;padding:18px 20px;display:grid;
+  grid-template-columns:auto 1fr;grid-gap:16px 24px;align-items:center}
+.readout{grid-row:span 2;text-align:center;background:#0d0c0b;border-radius:8px;padding:12px 18px;min-width:150px;
+  box-shadow:inset 0 0 0 2px #2a2824}
+.readout .big{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-weight:700;line-height:1;color:var(--accent)}
+.readout .num{font-size:46px}.readout .pct{font-size:20px;margin-left:2px}
+.readout .rlabel{margin-top:6px;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#b9b4a8}
+.bar{display:flex;height:22px;border-radius:11px;overflow:hidden;background:#0d0c0b;box-shadow:inset 0 0 0 2px #2a2824}
+.seg{color:#0d0c0b;font:700 11px 'SF Mono',monospace;line-height:22px;text-align:center;min-width:0}
+.seg.full{background:var(--full)}.seg.partial{background:var(--partial)}.seg.empty{background:var(--empty)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;align-self:start}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+  background:#26241f;padding:4px 10px;border-radius:20px}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.chip.full i{background:var(--full)}.chip.partial i{background:var(--partial)}.chip.empty i{background:var(--empty)}
+.chip.deprecated i{background:var(--deprecated)}.chip.muted{color:#b9b4a8}
+
+/* section labels */
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.2em;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+h2:before{content:"";width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:inset 0 0 0 3px var(--bg)}
+h2.h-full:before{background:var(--full)}h2.h-partial:before{background:var(--partial)}h2.h-empty:before{background:var(--empty)}
+.count{color:var(--soft);font-weight:400;letter-spacing:0}
+
+/* operation modules */
+.op{background:var(--card);border:1.5px solid var(--line);border-radius:8px;margin:8px 0;overflow:hidden}
+summary{cursor:pointer;padding:11px 14px;display:flex;align-items:center;gap:12px;font-size:13px;list-style:none}
+summary::-webkit-details-marker{display:none}
+.led{width:11px;height:11px;border-radius:50%;flex:0 0 auto;background:var(--soft);box-shadow:0 0 0 2px var(--card),0 0 6px currentColor}
+.op-full .led{background:var(--full);color:var(--full)}.op-partial .led{background:var(--partial);color:var(--partial)}
+.op-empty .led{background:var(--empty);color:var(--empty)}.op-deprecated .led{background:var(--deprecated);color:var(--deprecated)}
+.method{font:700 12px 'SF Mono',monospace;text-transform:uppercase;min-width:54px;letter-spacing:.05em}
+.path{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px}
+.badge{margin-left:auto;background:var(--ink);color:var(--accent);border-radius:20px;padding:2px 10px;
+  font:700 11px 'SF Mono',monospace}
+.calls{font-size:10px;color:var(--soft);text-transform:uppercase;letter-spacing:.1em;min-width:64px;text-align:right}
+.conditions{list-style:none;margin:0;padding:4px 14px 12px 40px;font-size:13px;border-top:1px dashed #cfccc3}
+.conditions li{padding:3px 0}.conditions .cov .mark{color:var(--full)}.conditions .unc .mark{color:var(--empty)}
+.mark{display:inline-block;width:16px}.reason{color:var(--soft);font-style:italic}.muted{color:var(--soft)}
+
+/* tables */
+table.tags{border-collapse:collapse;width:100%;font-size:12px;background:var(--card);
+  border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+table.tags th{background:var(--ink);color:#f6f5f1;text-transform:uppercase;letter-spacing:.12em;font-size:10px}
+table.tags th,table.tags td{padding:7px 11px;text-align:left;border-bottom:1px solid #ddd9cf}
+table.tags tr:last-child td{border-bottom:none}.tags .mono,table.tags td{font-family:'SF Mono',ui-monospace,Menlo,monospace}
+table.tags td.full{color:var(--full)}table.tags td.partial{color:var(--partial)}table.tags td.empty{color:var(--empty)}
+ul.missed{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;list-style:none;padding:12px 16px;margin:0;
+  background:var(--card);border:1.5px solid var(--line);border-radius:8px;columns:2;column-gap:24px}
+ul.missed li{padding:2px 0;break-inside:avoid}
+</style>
+</head>
+<body>
+<header>
+  <span class="knob"></span>
+  <h1>Snapshot Shop — Swagger Coverage Report</h1>
+  <div class="meta">OAS 3.0 · 2026-01-01T00:00:00.000Z</div>
+</header>
+<main>
+<div class="summary">
+  <div class="readout">
+    <div class="big"><span class="num">33.333</span><span class="pct">%</span></div>
+    <div class="rlabel">Full coverage</div>
+  </div>
+  <div class="bar">
+    <div class="seg full" style="width:33.333%">33.333%</div>
+    <div class="seg partial" style="width:33.333%">33.333%</div>
+    <div class="seg empty" style="width:33.333%">33.333%</div>
+  </div>
+  <div class="legend">
+    <span class="chip full"><i></i>Full 1</span>
+    <span class="chip partial"><i></i>Partial 1</span>
+    <span class="chip empty"><i></i>Empty 1</span>
+    
+    <span class="chip muted">Conditions 11/14</span>
+  </div>
+</div>
+<section>
+  <h2 class="h-empty">Empty <span class="count">(1)</span></h2>
+  <details class="op op-empty">
+  <summary>
+    <span class="led"></span>
+    <span class="method">GET</span>
+    <span class="path">/categories</span>
+    <span class="badge">0/2</span>
+    <span class="calls">0 calls</span>
+  </summary>
+  <ul class="conditions"><li class="unc"><span class="mark">○</span> HTTP status 200</li><li class="unc"><span class="mark">○</span> only declared status <span class="reason">No calls — no statuses</span></li></ul>
+</details>
+</section>
+<section>
+  <h2 class="h-partial">Partial <span class="count">(1)</span></h2>
+  <details class="op op-partial">
+  <summary>
+    <span class="led"></span>
+    <span class="method">GET</span>
+    <span class="path">/products/{id}</span>
+    <span class="badge">7/8</span>
+    <span class="calls">3 calls</span>
+  </summary>
+  <ul class="conditions"><li class="cov"><span class="mark">●</span> HTTP status 200</li><li class="cov"><span class="mark">●</span> HTTP status 404</li><li class="cov"><span class="mark">●</span> only declared status</li><li class="unc"><span class="mark">○</span> only declared response fields <span class="reason">Undeclared fields: extra</span></li><li class="cov"><span class="mark">●</span> path «id» is not empty</li><li class="cov"><span class="mark">●</span> query «expand» is not empty</li><li class="cov"><span class="mark">●</span> query «expand» contains all values from enum [price, category]</li><li class="cov"><span class="mark">●</span> query «expand» contains values not only from enum <span class="reason">Checked values: [price, category, weird]</span></li></ul>
+</details>
+</section>
+<section>
+  <h2 class="h-full">Full <span class="count">(1)</span></h2>
+  <details class="op op-full">
+  <summary>
+    <span class="led"></span>
+    <span class="method">POST</span>
+    <span class="path">/products</span>
+    <span class="badge">4/4</span>
+    <span class="calls">1 calls</span>
+  </summary>
+  <ul class="conditions"><li class="cov"><span class="mark">●</span> HTTP status 201</li><li class="cov"><span class="mark">●</span> only declared status</li><li class="cov"><span class="mark">●</span> not empty body request</li><li class="cov"><span class="mark">●</span> «title» is not empty</li></ul>
+</details>
+</section>
+<section><h2>Tags</h2>
+  <table class="tags"><thead><tr><th>Tags</th><th>Full</th><th>Partial</th><th>Empty</th><th>operations</th></tr></thead>
+  <tbody><tr><td>categories</td><td class="full">0</td><td class="partial">0</td><td class="empty">1</td><td>1</td></tr><tr><td>products</td><td class="full">1</td><td class="partial">1</td><td class="empty">0</td><td>2</td></tr></tbody></table></section>
+<section><h2>Conditions by type</h2>
+  <table class="tags"><thead><tr><th>type</th><th>Covered</th><th>Total</th><th>%</th></tr></thead>
+  <tbody><tr><td>enum-all-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>enum-another-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>not-empty-body</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>only-declared-response-field</td><td>0</td><td>1</td><td>0%</td></tr><tr><td>only-declared-status</td><td>2</td><td>3</td><td>66.667%</td></tr><tr><td>parameter-not-empty</td><td>2</td><td>2</td><td>100%</td></tr><tr><td>property-not-empty</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>status</td><td>3</td><td>4</td><td>75%</td></tr></tbody></table></section>
+<section><h2>Never called <span class="count">(1)</span></h2>
+  <ul class="missed"><li>GET /categories</li></ul></section>
+<section><h2>Missed calls <span class="count">(1)</span></h2>
+  <ul class="missed"><li>GET /api/v1/legacy <span class="muted">×1</span></li></ul></section>
+<section><h2>Generation</h2>
+  <table class="tags"><tbody><tr><td>Spec source</td><td>openapi.json</td></tr><tr><td>Coverage files</td><td>—</td></tr><tr><td>Recorded calls</td><td>5</td></tr><tr><td>Generated</td><td>2026-01-01T00:00:00.000Z</td></tr></tbody></table></section>
+</main>
+</body>
+</html>

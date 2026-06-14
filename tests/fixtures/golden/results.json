@@ -1,0 +1,203 @@
+{
+  "specTitle": "Snapshot Shop",
+  "specVersion": "3.0",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
+  "generation": {
+    "callCount": 5,
+    "specSource": "openapi.json"
+  },
+  "operations": [
+    {
+      "method": "GET",
+      "path": "/categories",
+      "tags": [
+        "categories"
+      ],
+      "deprecated": false,
+      "state": "empty",
+      "processCount": 0,
+      "conditionCount": 2,
+      "coveredConditionCount": 0,
+      "conditions": [
+        {
+          "type": "status",
+          "name": "HTTP status 200",
+          "covered": false
+        },
+        {
+          "type": "only-declared-status",
+          "name": "only declared status",
+          "covered": false,
+          "reason": "No calls — no statuses"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/products",
+      "tags": [
+        "products"
+      ],
+      "deprecated": false,
+      "state": "full",
+      "processCount": 1,
+      "conditionCount": 4,
+      "coveredConditionCount": 4,
+      "conditions": [
+        {
+          "type": "status",
+          "name": "HTTP status 201",
+          "covered": true
+        },
+        {
+          "type": "only-declared-status",
+          "name": "only declared status",
+          "covered": true
+        },
+        {
+          "type": "not-empty-body",
+          "name": "not empty body request",
+          "covered": true
+        },
+        {
+          "type": "property-not-empty",
+          "name": "«title» is not empty",
+          "covered": true
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/products/{id}",
+      "tags": [
+        "products"
+      ],
+      "deprecated": false,
+      "state": "partial",
+      "processCount": 3,
+      "conditionCount": 8,
+      "coveredConditionCount": 7,
+      "conditions": [
+        {
+          "type": "status",
+          "name": "HTTP status 200",
+          "covered": true
+        },
+        {
+          "type": "status",
+          "name": "HTTP status 404",
+          "covered": true
+        },
+        {
+          "type": "only-declared-status",
+          "name": "only declared status",
+          "covered": true
+        },
+        {
+          "type": "only-declared-response-field",
+          "name": "only declared response fields",
+          "covered": false,
+          "reason": "Undeclared fields: extra"
+        },
+        {
+          "type": "parameter-not-empty",
+          "name": "path «id» is not empty",
+          "covered": true
+        },
+        {
+          "type": "parameter-not-empty",
+          "name": "query «expand» is not empty",
+          "covered": true
+        },
+        {
+          "type": "enum-all-value",
+          "name": "query «expand» contains all values from enum [price, category]",
+          "covered": true
+        },
+        {
+          "type": "enum-another-value",
+          "name": "query «expand» contains values not only from enum",
+          "covered": true,
+          "reason": "Checked values: [price, category, weird]"
+        }
+      ]
+    }
+  ],
+  "missed": [
+    {
+      "method": "GET",
+      "path": "/api/v1/legacy",
+      "count": 1
+    }
+  ],
+  "summary": {
+    "full": 1,
+    "partial": 1,
+    "empty": 1,
+    "deprecated": 0,
+    "total": 3,
+    "fullPercent": 33.333,
+    "partialPercent": 33.333,
+    "emptyPercent": 33.333,
+    "conditionsCovered": 11,
+    "conditionsTotal": 14
+  },
+  "conditionStats": [
+    {
+      "type": "enum-all-value",
+      "total": 1,
+      "covered": 1
+    },
+    {
+      "type": "enum-another-value",
+      "total": 1,
+      "covered": 1
+    },
+    {
+      "type": "not-empty-body",
+      "total": 1,
+      "covered": 1
+    },
+    {
+      "type": "only-declared-response-field",
+      "total": 1,
+      "covered": 0
+    },
+    {
+      "type": "only-declared-status",
+      "total": 3,
+      "covered": 2
+    },
+    {
+      "type": "parameter-not-empty",
+      "total": 2,
+      "covered": 2
+    },
+    {
+      "type": "property-not-empty",
+      "total": 1,
+      "covered": 1
+    },
+    {
+      "type": "status",
+      "total": 4,
+      "covered": 3
+    }
+  ],
+  "tagStats": [
+    {
+      "tag": "categories",
+      "full": 0,
+      "partial": 0,
+      "empty": 1,
+      "total": 1
+    },
+    {
+      "tag": "products",
+      "full": 1,
+      "partial": 1,
+      "empty": 0,
+      "total": 2
+    }
+  ]
+}
