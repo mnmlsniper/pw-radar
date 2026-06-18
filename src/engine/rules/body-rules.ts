@@ -17,7 +17,7 @@ export class NotEmptyBodyRule implements ConditionRule {
   createConditions(operation: SpecOperation): Condition[] {
     if (!operation.hasBody) return [];
     return [
-      binaryCondition(this.id, "not empty body request", (call) => call.raw.requestBody != null),
+      binaryCondition(this.id, { key: "cond.notEmptyBody" }, (call) => call.raw.requestBody != null),
     ];
   }
 }
@@ -28,7 +28,11 @@ export class PropertyNotEmptyRule implements ConditionRule {
 
   createConditions(operation: SpecOperation): Condition[] {
     return operation.bodyProperties.map((prop) =>
-      binaryCondition(this.id, `«${prop.name}» is not empty`, (call) => call.bodyProps.has(prop.name)),
+      binaryCondition(
+        this.id,
+        { key: "cond.propNotEmpty", params: { name: prop.name } },
+        (call) => call.bodyProps.has(prop.name),
+      ),
     );
   }
 }
@@ -51,7 +55,7 @@ export class PropertyEnumAllValuesRule implements ConditionRule {
         const seen = new Set<string>();
         return accumulatingCondition(
           this.id,
-          `«${prop.name}» contains all values from enum [${expected.join(", ")}]`,
+          { key: "cond.propEnumAll", params: { name: prop.name, values: expected.join(", ") } },
           (call) => {
             for (const v of call.bodyValues(prop.name)) seen.add(v);
           },
@@ -59,7 +63,7 @@ export class PropertyEnumAllValuesRule implements ConditionRule {
             const missed = expected.filter((v) => !seen.has(v));
             return missed.length === 0
               ? { covered: true }
-              : { covered: false, reason: `Missed values [${missed.join(", ")}]` };
+              : { covered: false, reason: { key: "reason.missedValues", params: { values: missed.join(", ") } } };
           },
         );
       });
@@ -81,13 +85,16 @@ export class PropertyNotOnlyEnumValuesRule implements ConditionRule {
         const seen = new Set<string>();
         return accumulatingCondition(
           this.id,
-          `«${prop.name}» contains values not only from enum`,
+          { key: "cond.propEnumAnother", params: { name: prop.name } },
           (call) => {
             for (const v of call.bodyValues(prop.name)) seen.add(v);
           },
           () => {
             const extra = [...seen].filter((v) => !expected.has(v));
-            return { covered: extra.length > 0, reason: `Checked values: [${[...seen].join(", ")}]` };
+            return {
+              covered: extra.length > 0,
+              reason: { key: "reason.checkedValues", params: { values: [...seen].join(", ") } },
+            };
           },
         );
       });

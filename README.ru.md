@@ -1,5 +1,7 @@
 # pw-radar
 
+[![npm](https://img.shields.io/npm/v/pw-radar.svg)](https://www.npmjs.com/package/pw-radar)
+
 Покрытие API-тестами относительно OpenAPI/Swagger-спецификации — TypeScript-порт
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), без необходимости в JVM.
 
@@ -72,13 +74,16 @@ npx pw-radar -s openapi.yaml -i coverage-output
   -c, --config <путь>     JSON-файл конфигурации
   -b, --base-path <p>     Префикс, который есть в записях, но не в спеке (можно несколько)
   -H, --header "K: V"     HTTP-заголовок для загрузки удалённой спеки (можно несколько)
+  -l, --locale <en|ru>    Начальный язык отчёта (в HTML встроен переключатель EN/RU)
       --validate          Валидировать спеку (падать на невалидной), а не просто парсить
   -q, --quiet             Без сводки в консоль
   -v, --verbose           Печатать предупреждения
   -h, --help
 ```
 
-На выходе — `pw-radar-report.html` и `pw-radar-results.json`.
+На выходе — `pw-radar-report.html` и `pw-radar-results.json`. В HTML зашиты все языки и есть
+встроенный **переключатель EN/RU** (выбор запоминается в `localStorage`); `--locale` задаёт
+лишь начальный язык.
 
 ### Базовый путь
 

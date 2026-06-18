@@ -22,13 +22,19 @@
         {
           "type": "status",
           "name": "HTTP status 200",
+          "nameKey": "cond.status",
+          "nameParams": {
+            "status": "200"
+          },
           "covered": false
         },
         {
           "type": "only-declared-status",
           "name": "only declared status",
+          "nameKey": "cond.onlyDeclaredStatus",
           "covered": false,
-          "reason": "No calls — no statuses"
+          "reason": "No calls — no statuses",
+          "reasonKey": "reason.noCalls"
         }
       ]
     },
@@ -47,21 +53,31 @@
         {
           "type": "status",
           "name": "HTTP status 201",
+          "nameKey": "cond.status",
+          "nameParams": {
+            "status": "201"
+          },
           "covered": true
         },
         {
           "type": "only-declared-status",
           "name": "only declared status",
+          "nameKey": "cond.onlyDeclaredStatus",
           "covered": true
         },
         {
           "type": "not-empty-body",
           "name": "not empty body request",
+          "nameKey": "cond.notEmptyBody",
           "covered": true
         },
         {
           "type": "property-not-empty",
           "name": "«title» is not empty",
+          "nameKey": "cond.propNotEmpty",
+          "nameParams": {
+            "name": "title"
+          },
           "covered": true
         }
       ]
@@ -81,44 +97,83 @@
         {
           "type": "status",
           "name": "HTTP status 200",
+          "nameKey": "cond.status",
+          "nameParams": {
+            "status": "200"
+          },
           "covered": true
         },
         {
           "type": "status",
           "name": "HTTP status 404",
+          "nameKey": "cond.status",
+          "nameParams": {
+            "status": "404"
+          },
           "covered": true
         },
         {
           "type": "only-declared-status",
           "name": "only declared status",
+          "nameKey": "cond.onlyDeclaredStatus",
           "covered": true
         },
         {
           "type": "only-declared-response-field",
           "name": "only declared response fields",
+          "nameKey": "cond.onlyDeclaredResponseFields",
           "covered": false,
-          "reason": "Undeclared fields: extra"
+          "reason": "Undeclared fields: extra",
+          "reasonKey": "reason.undeclaredFields",
+          "reasonParams": {
+            "values": "extra"
+          }
         },
         {
           "type": "parameter-not-empty",
           "name": "path «id» is not empty",
+          "nameKey": "cond.paramNotEmpty",
+          "nameParams": {
+            "in": "path",
+            "name": "id"
+          },
           "covered": true
         },
         {
           "type": "parameter-not-empty",
           "name": "query «expand» is not empty",
+          "nameKey": "cond.paramNotEmpty",
+          "nameParams": {
+            "in": "query",
+            "name": "expand"
+          },
           "covered": true
         },
         {
           "type": "enum-all-value",
           "name": "query «expand» contains all values from enum [price, category]",
+          "nameKey": "cond.paramEnumAll",
+          "nameParams": {
+            "in": "query",
+            "name": "expand",
+            "values": "price, category"
+          },
           "covered": true
         },
         {
           "type": "enum-another-value",
           "name": "query «expand» contains values not only from enum",
+          "nameKey": "cond.paramEnumAnother",
+          "nameParams": {
+            "in": "query",
+            "name": "expand"
+          },
           "covered": true,
-          "reason": "Checked values: [price, category, weird]"
+          "reason": "Checked values: [price, category, weird]",
+          "reasonKey": "reason.checkedValues",
+          "reasonParams": {
+            "values": "price, category, weird"
+          }
         }
       ]
     }

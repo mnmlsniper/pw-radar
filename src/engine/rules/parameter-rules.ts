@@ -19,8 +19,10 @@ export class NotEmptyParameterRule implements ConditionRule {
 
   createConditions(operation: SpecOperation): Condition[] {
     return operation.parameters.map((param) =>
-      binaryCondition(this.id, `${param.in} «${param.name}» is not empty`, (call) =>
-        call.hasParam(param.name, param.in),
+      binaryCondition(
+        this.id,
+        { key: "cond.paramNotEmpty", params: { in: param.in, name: param.name } },
+        (call) => call.hasParam(param.name, param.in),
       ),
     );
   }
@@ -39,7 +41,7 @@ export class EmptyHeaderRule implements ConditionRule {
       .map((param) =>
         binaryCondition(
           this.id,
-          `header «${param.name}» is empty`,
+          { key: "cond.headerEmpty", params: { name: param.name } },
           (call) => !call.hasParam(param.name, "header"),
         ),
       );
@@ -61,7 +63,7 @@ export class EnumAllValuesRule implements ConditionRule {
         const seen = new Set<string>();
         return accumulatingCondition(
           this.id,
-          `${param.in} «${param.name}» contains all values from enum [${expected.join(", ")}]`,
+          { key: "cond.paramEnumAll", params: { in: param.in, name: param.name, values: expected.join(", ") } },
           (call) => {
             for (const v of call.paramValues(param.name, param.in)) seen.add(v);
           },
@@ -69,7 +71,7 @@ export class EnumAllValuesRule implements ConditionRule {
             const missed = expected.filter((v) => !seen.has(v));
             return missed.length === 0
               ? { covered: true }
-              : { covered: false, reason: `Missed values [${missed.join(", ")}]` };
+              : { covered: false, reason: { key: "reason.missedValues", params: { values: missed.join(", ") } } };
           },
         );
       });
@@ -91,15 +93,16 @@ export class NotOnlyEnumValuesRule implements ConditionRule {
         const seen = new Set<string>();
         return accumulatingCondition(
           this.id,
-          `${param.in} «${param.name}» contains values not only from enum`,
+          { key: "cond.paramEnumAnother", params: { in: param.in, name: param.name } },
           (call) => {
             for (const v of call.paramValues(param.name, param.in)) seen.add(v);
           },
           () => {
             const extra = [...seen].filter((v) => !expected.has(v));
-            return extra.length > 0
-              ? { covered: true, reason: `Checked values: [${[...seen].join(", ")}]` }
-              : { covered: false, reason: `Checked values: [${[...seen].join(", ")}]` };
+            return {
+              covered: extra.length > 0,
+              reason: { key: "reason.checkedValues", params: { values: [...seen].join(", ") } },
+            };
           },
         );
       });

@@ -1,18 +1,22 @@
 import type { SpecOperation } from "../spec/model.js";
+import type { Message } from "../i18n.js";
 import type { CallView } from "./call-view.js";
 
 /**
  * A single coverage condition attached to an operation. `covered` is sticky:
  * once a matching call satisfies it, it stays covered. Accumulating conditions
  * (enum coverage, declared-status) decide `covered` in {@link Condition.postCheck}.
+ *
+ * Names and reasons are stored as structured {@link Message}s (catalog key +
+ * params) so the report can render them in any locale.
  */
 export interface Condition {
   /** Rule id this condition belongs to (its "type"). */
   readonly type: string;
-  /** Human-readable label. */
-  readonly name: string;
-  /** Optional explanation, filled in during postCheck. */
-  reason?: string;
+  /** Structured, localizable name. */
+  readonly message: Message;
+  /** Optional structured reason, filled in during postCheck. */
+  reason?: Message;
   covered: boolean;
   /** Processes one call that matched the owning operation. */
   check(call: CallView): void;
@@ -29,12 +33,12 @@ export interface ConditionRule {
 /** Condition that becomes covered as soon as one call satisfies a predicate. */
 export function binaryCondition(
   type: string,
-  name: string,
+  message: Message,
   predicate: (call: CallView) => boolean,
 ): Condition {
   return {
     type,
-    name,
+    message,
     covered: false,
     check(call: CallView): void {
       if (!this.covered && predicate(call)) this.covered = true;
@@ -48,13 +52,13 @@ export function binaryCondition(
 /** Condition that accumulates state across calls and decides coverage at the end. */
 export function accumulatingCondition(
   type: string,
-  name: string,
+  message: Message,
   onCall: (call: CallView) => void,
-  finalize: () => { covered: boolean; reason?: string },
+  finalize: () => { covered: boolean; reason?: Message },
 ): Condition {
   return {
     type,
-    name,
+    message,
     covered: false,
     check(call: CallView): void {
       onCall(call);

@@ -4,67 +4,20 @@ import type {
   OperationCoverage,
   OperationCoverageState,
 } from "../results.js";
+import { MESSAGES, t as translate, type Locale, type MessageKey } from "../i18n.js";
 import { formatNumber } from "./number-format.js";
 
 export const DEFAULT_HTML_FILENAME = "pw-radar-report.html";
 
-type Locale = "en" | "ru";
+export type { Locale } from "../i18n.js";
 
 export interface HtmlWriterOptions {
   filename?: string;
+  /** Initial language; all languages are embedded with a runtime switcher. */
   locale?: Locale;
   /** Percentage display pattern, e.g. "0.##" (default "0.###"). */
   numberFormat?: string;
 }
-
-const LABELS: Record<Locale, Record<string, string>> = {
-  en: {
-    title: "Swagger Coverage Report",
-    coverage: "coverage",
-    full: "Full",
-    partial: "Partial",
-    empty: "Empty",
-    deprecated: "Deprecated",
-    operations: "operations",
-    conditions: "Conditions",
-    conditionTypes: "Conditions by type",
-    covered: "Covered",
-    total: "Total",
-    zeroCall: "Never called",
-    tags: "Tags",
-    missed: "Missed calls",
-    calls: "calls",
-    generated: "Generated",
-    generation: "Generation",
-    specSource: "Spec source",
-    filesRead: "Coverage files",
-    callsRecorded: "Recorded calls",
-    noTag: "default",
-  },
-  ru: {
-    title: "Отчёт о покрытии Swagger",
-    coverage: "покрытие",
-    full: "Полное",
-    partial: "Частичное",
-    empty: "Пустое",
-    deprecated: "Устаревшие",
-    operations: "операций",
-    conditions: "Условия",
-    conditionTypes: "Условия по типам",
-    covered: "Покрыто",
-    total: "Всего",
-    zeroCall: "Ни разу не вызваны",
-    tags: "Теги",
-    missed: "Невостребованные вызовы",
-    calls: "вызовов",
-    generated: "Сгенерировано",
-    generation: "Генерация",
-    specSource: "Источник спеки",
-    filesRead: "Файлов покрытия",
-    callsRecorded: "Записано вызовов",
-    noTag: "default",
-  },
-};
 
 function esc(value: unknown): string {
   return String(value)
@@ -74,15 +27,39 @@ function esc(value: unknown): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Inlines a value into a <script> safely (prevents </script> / tag breakouts). */
+function jsonForScript(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+/**
+ * A localized `<span>` carrying its catalog key (and params) so the in-page
+ * switcher can re-render it in another language.
+ */
+function msgSpan(
+  loc: Locale,
+  key: MessageKey,
+  params?: Record<string, string>,
+  cls?: string,
+): string {
+  const text = translate(loc, key, params);
+  const args = params ? ` data-i18n-args="${esc(JSON.stringify(params))}"` : "";
+  const classAttr = cls ? ` class="${cls}"` : "";
+  return `<span${classAttr} data-i18n="${key}"${args}>${esc(text)}</span>`;
+}
+
 const STATE_ORDER: OperationCoverageState[] = ["empty", "partial", "full", "deprecated"];
 
-function operationCard(op: OperationCoverage, t: Record<string, string>): string {
+function operationCard(op: OperationCoverage, loc: Locale): string {
   const conditions = op.conditions
     .map((c) => {
       const mark = c.covered ? "●" : "○";
       const cls = c.covered ? "cov" : "unc";
-      const reason = c.reason ? ` <span class="reason">${esc(c.reason)}</span>` : "";
-      return `<li class="${cls}"><span class="mark">${mark}</span> ${esc(c.name)}${reason}</li>`;
+      const name = msgSpan(loc, c.nameKey as MessageKey, c.nameParams);
+      const reason = c.reasonKey
+        ? ` ${msgSpan(loc, c.reasonKey as MessageKey, c.reasonParams, "reason")}`
+        : "";
+      return `<li class="${cls}"><span class="mark">${mark}</span> ${name}${reason}</li>`;
     })
     .join("");
   return `<details class="op op-${op.state}">
@@ -91,29 +68,29 @@ function operationCard(op: OperationCoverage, t: Record<string, string>): string
     <span class="method">${esc(op.method)}</span>
     <span class="path">${esc(op.path)}</span>
     <span class="badge">${op.coveredConditionCount}/${op.conditionCount}</span>
-    <span class="calls">${op.processCount} ${esc(t["calls"])}</span>
+    <span class="calls">${op.processCount} ${msgSpan(loc, "calls")}</span>
   </summary>
   <ul class="conditions">${conditions || "<li class='muted'>—</li>"}</ul>
 </details>`;
 }
 
-function section(state: OperationCoverageState, results: CoverageResults, t: Record<string, string>): string {
+function section(state: OperationCoverageState, results: CoverageResults, loc: Locale): string {
   const ops = results.operations.filter((o) => o.state === state);
   if (ops.length === 0) return "";
   return `<section>
-  <h2 class="h-${state}">${esc(t[state])} <span class="count">(${ops.length})</span></h2>
-  ${ops.map((o) => operationCard(o, t)).join("\n")}
+  <h2 class="h-${state}">${msgSpan(loc, state)} <span class="count">(${ops.length})</span></h2>
+  ${ops.map((o) => operationCard(o, loc)).join("\n")}
 </section>`;
 }
 
-function summaryBar(results: CoverageResults, t: Record<string, string>, nf: string): string {
+function summaryBar(results: CoverageResults, loc: Locale, nf: string): string {
   const s = results.summary;
   const bar = (cls: string, pct: number): string =>
     pct > 0 ? `<div class="seg ${cls}" style="width:${pct}%">${formatNumber(pct, nf)}%</div>` : "";
   return `<div class="summary">
   <div class="readout">
     <div class="big"><span class="num">${formatNumber(s.fullPercent, nf)}</span><span class="pct">%</span></div>
-    <div class="rlabel">${esc(t["full"])} ${esc(t["coverage"])}</div>
+    <div class="rlabel">${msgSpan(loc, "full")} ${msgSpan(loc, "coverage")}</div>
   </div>
   <div class="bar">
     ${bar("full", s.fullPercent)}
@@ -121,27 +98,27 @@ function summaryBar(results: CoverageResults, t: Record<string, string>, nf: str
     ${bar("empty", s.emptyPercent)}
   </div>
   <div class="legend">
-    <span class="chip full"><i></i>${esc(t["full"])} ${s.full}</span>
-    <span class="chip partial"><i></i>${esc(t["partial"])} ${s.partial}</span>
-    <span class="chip empty"><i></i>${esc(t["empty"])} ${s.empty}</span>
-    ${s.deprecated ? `<span class="chip deprecated"><i></i>${esc(t["deprecated"])} ${s.deprecated}</span>` : ""}
-    <span class="chip muted">${esc(t["conditions"])} ${s.conditionsCovered}/${s.conditionsTotal}</span>
+    <span class="chip full"><i></i>${msgSpan(loc, "full")} ${s.full}</span>
+    <span class="chip partial"><i></i>${msgSpan(loc, "partial")} ${s.partial}</span>
+    <span class="chip empty"><i></i>${msgSpan(loc, "empty")} ${s.empty}</span>
+    ${s.deprecated ? `<span class="chip deprecated"><i></i>${msgSpan(loc, "deprecated")} ${s.deprecated}</span>` : ""}
+    <span class="chip muted">${msgSpan(loc, "conditions")} ${s.conditionsCovered}/${s.conditionsTotal}</span>
   </div>
 </div>`;
 }
 
-function generationSection(results: CoverageResults, t: Record<string, string>): string {
+function generationSection(results: CoverageResults, loc: Locale): string {
   const g = results.generation;
   const rows: string[] = [];
-  if (g.specSource) rows.push(`<tr><td>${esc(t["specSource"])}</td><td>${esc(g.specSource)}</td></tr>`);
-  rows.push(`<tr><td>${esc(t["filesRead"])}</td><td>${g.fileCount ?? "—"}</td></tr>`);
-  rows.push(`<tr><td>${esc(t["callsRecorded"])}</td><td>${g.callCount}</td></tr>`);
-  rows.push(`<tr><td>${esc(t["generated"])}</td><td>${esc(results.generatedAt)}</td></tr>`);
-  return `<section><h2>${esc(t["generation"])}</h2>
+  if (g.specSource) rows.push(`<tr><td>${msgSpan(loc, "specSource")}</td><td>${esc(g.specSource)}</td></tr>`);
+  rows.push(`<tr><td>${msgSpan(loc, "filesRead")}</td><td>${g.fileCount ?? "—"}</td></tr>`);
+  rows.push(`<tr><td>${msgSpan(loc, "callsRecorded")}</td><td>${g.callCount}</td></tr>`);
+  rows.push(`<tr><td>${msgSpan(loc, "generated")}</td><td>${esc(results.generatedAt)}</td></tr>`);
+  return `<section><h2>${msgSpan(loc, "generation")}</h2>
   <table class="tags"><tbody>${rows.join("")}</tbody></table></section>`;
 }
 
-function tagsTable(results: CoverageResults, t: Record<string, string>): string {
+function tagsTable(results: CoverageResults, loc: Locale): string {
   if (results.tagStats.length === 0) return "";
   const rows = results.tagStats
     .map(
@@ -149,12 +126,12 @@ function tagsTable(results: CoverageResults, t: Record<string, string>): string 
         `<tr><td>${esc(tag.tag)}</td><td class="full">${tag.full}</td><td class="partial">${tag.partial}</td><td class="empty">${tag.empty}</td><td>${tag.total}</td></tr>`,
     )
     .join("");
-  return `<section><h2>${esc(t["tags"])}</h2>
-  <table class="tags"><thead><tr><th>${esc(t["tags"])}</th><th>${esc(t["full"])}</th><th>${esc(t["partial"])}</th><th>${esc(t["empty"])}</th><th>${esc(t["operations"])}</th></tr></thead>
+  return `<section><h2>${msgSpan(loc, "tags")}</h2>
+  <table class="tags"><thead><tr><th>${msgSpan(loc, "tags")}</th><th>${msgSpan(loc, "full")}</th><th>${msgSpan(loc, "partial")}</th><th>${msgSpan(loc, "empty")}</th><th>${msgSpan(loc, "operations")}</th></tr></thead>
   <tbody>${rows}</tbody></table></section>`;
 }
 
-function conditionStatsTable(results: CoverageResults, t: Record<string, string>, nf: string): string {
+function conditionStatsTable(results: CoverageResults, loc: Locale, nf: string): string {
   if (results.conditionStats.length === 0) return "";
   const rows = results.conditionStats
     .map((c) => {
@@ -162,25 +139,25 @@ function conditionStatsTable(results: CoverageResults, t: Record<string, string>
       return `<tr><td>${esc(c.type)}</td><td>${c.covered}</td><td>${c.total}</td><td>${formatNumber(pct, nf)}%</td></tr>`;
     })
     .join("");
-  return `<section><h2>${esc(t["conditionTypes"])}</h2>
-  <table class="tags"><thead><tr><th>type</th><th>${esc(t["covered"])}</th><th>${esc(t["total"])}</th><th>%</th></tr></thead>
+  return `<section><h2>${msgSpan(loc, "conditionTypes")}</h2>
+  <table class="tags"><thead><tr><th>type</th><th>${msgSpan(loc, "covered")}</th><th>${msgSpan(loc, "total")}</th><th>%</th></tr></thead>
   <tbody>${rows}</tbody></table></section>`;
 }
 
-function zeroCallSection(results: CoverageResults, t: Record<string, string>): string {
+function zeroCallSection(results: CoverageResults, loc: Locale): string {
   const zero = results.operations.filter((o) => o.processCount === 0 && o.state !== "deprecated");
   if (zero.length === 0) return "";
   const items = zero.map((o) => `<li>${esc(o.method)} ${esc(o.path)}</li>`).join("");
-  return `<section><h2>${esc(t["zeroCall"])} <span class="count">(${zero.length})</span></h2>
+  return `<section><h2>${msgSpan(loc, "zeroCall")} <span class="count">(${zero.length})</span></h2>
   <ul class="missed">${items}</ul></section>`;
 }
 
-function missedSection(results: CoverageResults, t: Record<string, string>): string {
+function missedSection(results: CoverageResults, loc: Locale): string {
   if (results.missed.length === 0) return "";
   const items = results.missed
     .map((m) => `<li>${esc(m.method)} ${esc(m.path)} <span class="muted">×${m.count}</span></li>`)
     .join("");
-  return `<section><h2>${esc(t["missed"])} <span class="count">(${results.missed.length})</span></h2>
+  return `<section><h2>${msgSpan(loc, "missed")} <span class="count">(${results.missed.length})</span></h2>
   <ul class="missed">${items}</ul></section>`;
 }
 
@@ -201,6 +178,10 @@ header .knob{width:34px;height:34px;border-radius:50%;background:var(--accent);
 header h1{margin:0;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
 header .meta{margin-left:auto;font-size:11px;letter-spacing:.08em;color:#b9b4a8;text-transform:uppercase;
   font-family:'SF Mono',ui-monospace,Menlo,monospace}
+header .lang{display:flex;gap:4px;margin-left:12px}
+header .lang button{font:700 10px 'SF Mono',monospace;letter-spacing:.1em;color:#b9b4a8;background:transparent;
+  border:1px solid #3a3833;border-radius:6px;padding:3px 8px;cursor:pointer;text-transform:uppercase}
+header .lang button.active{color:var(--ink);background:var(--accent);border-color:var(--accent)}
 main{max-width:1000px;margin:0 auto;padding:22px 22px 56px}
 section{margin-top:26px}
 
@@ -256,39 +237,86 @@ ul.missed{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12px;list
 ul.missed li{padding:2px 0;break-inside:avoid}
 `;
 
-/** Renders a self-contained HTML report. */
+/** Inline runtime language switcher (self-contained, no deps). */
+function i18nScript(initialLocale: Locale, specTitle: string): string {
+  return `<script>
+(function(){
+  var I18N=${jsonForScript(MESSAGES)};
+  var SPEC=${jsonForScript(specTitle)};
+  var SEP=SPEC?SPEC+" — ":"";
+  function fmt(tpl,args){return tpl.replace(/\\{(\\w+)\\}/g,function(_,k){return args&&args[k]!=null?args[k]:"{"+k+"}";});}
+  function apply(loc){
+    var dict=I18N[loc];
+    if(!dict)return;
+    document.documentElement.lang=loc;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var k=el.getAttribute("data-i18n");
+      if(dict[k]==null)return;
+      var a=el.getAttribute("data-i18n-args"),args=null;
+      if(a){try{args=JSON.parse(a);}catch(e){}}
+      el.textContent=args?fmt(dict[k],args):dict[k];
+    });
+    document.title=SEP+(dict.title||"");
+    document.querySelectorAll("[data-lang]").forEach(function(b){
+      b.classList.toggle("active",b.getAttribute("data-lang")===loc);
+    });
+    try{localStorage.setItem("pw-radar-locale",loc);}catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("[data-lang]");
+    if(b)apply(b.getAttribute("data-lang"));
+  });
+  var saved;try{saved=localStorage.getItem("pw-radar-locale");}catch(e){}
+  if(saved&&saved!==${jsonForScript(initialLocale)})apply(saved);
+})();
+</script>`;
+}
+
+/** Renders a self-contained HTML report with an in-page language switcher. */
 export function renderHtml(results: CoverageResults, locale: Locale = "en", numberFormat = "0.###"): string {
-  const t = LABELS[locale] ?? LABELS.en;
-  const title = results.specTitle ? `${esc(results.specTitle)} — ${esc(t["title"])}` : esc(t["title"]);
+  const loc: Locale = MESSAGES[locale] ? locale : "en";
+
+  const specTitle = results.specTitle ?? "";
+  const titleSep = specTitle ? `${esc(specTitle)} — ` : "";
+  const headTitle = (specTitle ? `${specTitle} — ` : "") + MESSAGES[loc].title;
+
+  const langButtons = (Object.keys(MESSAGES) as Locale[])
+    .map(
+      (l) => `<button data-lang="${l}"${l === loc ? ' class="active"' : ""}>${l.toUpperCase()}</button>`,
+    )
+    .join("");
+
   const body = [
-    summaryBar(results, t, numberFormat),
-    ...STATE_ORDER.map((s) => section(s, results, t)),
-    tagsTable(results, t),
-    conditionStatsTable(results, t, numberFormat),
-    zeroCallSection(results, t),
-    missedSection(results, t),
-    generationSection(results, t),
+    summaryBar(results, loc, numberFormat),
+    ...STATE_ORDER.map((s) => section(s, results, loc)),
+    tagsTable(results, loc),
+    conditionStatsTable(results, loc, numberFormat),
+    zeroCallSection(results, loc),
+    missedSection(results, loc),
+    generationSection(results, loc),
   ]
     .filter(Boolean)
     .join("\n");
 
   return `<!doctype html>
-<html lang="${locale}">
+<html lang="${loc}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
+<title>${esc(headTitle)}</title>
 <style>${STYLE}</style>
 </head>
 <body>
 <header>
   <span class="knob"></span>
-  <h1>${title}</h1>
+  <h1>${titleSep}<span data-i18n="title">${esc(MESSAGES[loc].title)}</span></h1>
   <div class="meta">OAS ${esc(results.specVersion)} · ${esc(results.generatedAt)}</div>
+  <div class="lang">${langButtons}</div>
 </header>
 <main>
 ${body}
 </main>
+${i18nScript(loc, specTitle)}
 </body>
 </html>`;
 }

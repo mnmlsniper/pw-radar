@@ -21,6 +21,10 @@ header .knob{width:34px;height:34px;border-radius:50%;background:var(--accent);
 header h1{margin:0;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
 header .meta{margin-left:auto;font-size:11px;letter-spacing:.08em;color:#b9b4a8;text-transform:uppercase;
   font-family:'SF Mono',ui-monospace,Menlo,monospace}
+header .lang{display:flex;gap:4px;margin-left:12px}
+header .lang button{font:700 10px 'SF Mono',monospace;letter-spacing:.1em;color:#b9b4a8;background:transparent;
+  border:1px solid #3a3833;border-radius:6px;padding:3px 8px;cursor:pointer;text-transform:uppercase}
+header .lang button.active{color:var(--ink);background:var(--accent);border-color:var(--accent)}
 main{max-width:1000px;margin:0 auto;padding:22px 22px 56px}
 section{margin-top:26px}
 
@@ -79,14 +83,15 @@ ul.missed li{padding:2px 0;break-inside:avoid}
 <body>
 <header>
   <span class="knob"></span>
-  <h1>Snapshot Shop — Swagger Coverage Report</h1>
+  <h1>Snapshot Shop — <span data-i18n="title">Swagger Coverage Report</span></h1>
   <div class="meta">OAS 3.0 · 2026-01-01T00:00:00.000Z</div>
+  <div class="lang"><button data-lang="en" class="active">EN</button><button data-lang="ru">RU</button></div>
 </header>
 <main>
 <div class="summary">
   <div class="readout">
     <div class="big"><span class="num">33.333</span><span class="pct">%</span></div>
-    <div class="rlabel">Full coverage</div>
+    <div class="rlabel"><span data-i18n="full">Full</span> <span data-i18n="coverage">coverage</span></div>
   </div>
   <div class="bar">
     <div class="seg full" style="width:33.333%">33.333%</div>
@@ -94,64 +99,95 @@ ul.missed li{padding:2px 0;break-inside:avoid}
     <div class="seg empty" style="width:33.333%">33.333%</div>
   </div>
   <div class="legend">
-    <span class="chip full"><i></i>Full 1</span>
-    <span class="chip partial"><i></i>Partial 1</span>
-    <span class="chip empty"><i></i>Empty 1</span>
+    <span class="chip full"><i></i><span data-i18n="full">Full</span> 1</span>
+    <span class="chip partial"><i></i><span data-i18n="partial">Partial</span> 1</span>
+    <span class="chip empty"><i></i><span data-i18n="empty">Empty</span> 1</span>
     
-    <span class="chip muted">Conditions 11/14</span>
+    <span class="chip muted"><span data-i18n="conditions">Conditions</span> 11/14</span>
   </div>
 </div>
 <section>
-  <h2 class="h-empty">Empty <span class="count">(1)</span></h2>
+  <h2 class="h-empty"><span data-i18n="empty">Empty</span> <span class="count">(1)</span></h2>
   <details class="op op-empty">
   <summary>
     <span class="led"></span>
     <span class="method">GET</span>
     <span class="path">/categories</span>
     <span class="badge">0/2</span>
-    <span class="calls">0 calls</span>
+    <span class="calls">0 <span data-i18n="calls">calls</span></span>
   </summary>
-  <ul class="conditions"><li class="unc"><span class="mark">○</span> HTTP status 200</li><li class="unc"><span class="mark">○</span> only declared status <span class="reason">No calls — no statuses</span></li></ul>
+  <ul class="conditions"><li class="unc"><span class="mark">○</span> <span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span> <span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason" data-i18n="reason.noCalls">No calls — no statuses</span></li></ul>
 </details>
 </section>
 <section>
-  <h2 class="h-partial">Partial <span class="count">(1)</span></h2>
+  <h2 class="h-partial"><span data-i18n="partial">Partial</span> <span class="count">(1)</span></h2>
   <details class="op op-partial">
   <summary>
     <span class="led"></span>
     <span class="method">GET</span>
     <span class="path">/products/{id}</span>
     <span class="badge">7/8</span>
-    <span class="calls">3 calls</span>
+    <span class="calls">3 <span data-i18n="calls">calls</span></span>
   </summary>
-  <ul class="conditions"><li class="cov"><span class="mark">●</span> HTTP status 200</li><li class="cov"><span class="mark">●</span> HTTP status 404</li><li class="cov"><span class="mark">●</span> only declared status</li><li class="unc"><span class="mark">○</span> only declared response fields <span class="reason">Undeclared fields: extra</span></li><li class="cov"><span class="mark">●</span> path «id» is not empty</li><li class="cov"><span class="mark">●</span> query «expand» is not empty</li><li class="cov"><span class="mark">●</span> query «expand» contains all values from enum [price, category]</li><li class="cov"><span class="mark">●</span> query «expand» contains values not only from enum <span class="reason">Checked values: [price, category, weird]</span></li></ul>
+  <ul class="conditions"><li class="cov"><span class="mark">●</span> <span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;404&quot;}">HTTP status 404</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="unc"><span class="mark">○</span> <span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason" data-i18n="reason.undeclaredFields" data-i18n-args="{&quot;values&quot;:&quot;extra&quot;}">Undeclared fields: extra</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.paramNotEmpty" data-i18n-args="{&quot;in&quot;:&quot;path&quot;,&quot;name&quot;:&quot;id&quot;}">path «id» is not empty</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.paramNotEmpty" data-i18n-args="{&quot;in&quot;:&quot;query&quot;,&quot;name&quot;:&quot;expand&quot;}">query «expand» is not empty</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.paramEnumAll" data-i18n-args="{&quot;in&quot;:&quot;query&quot;,&quot;name&quot;:&quot;expand&quot;,&quot;values&quot;:&quot;price, category&quot;}">query «expand» contains all values from enum [price, category]</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.paramEnumAnother" data-i18n-args="{&quot;in&quot;:&quot;query&quot;,&quot;name&quot;:&quot;expand&quot;}">query «expand» contains values not only from enum</span> <span class="reason" data-i18n="reason.checkedValues" data-i18n-args="{&quot;values&quot;:&quot;price, category, weird&quot;}">Checked values: [price, category, weird]</span></li></ul>
 </details>
 </section>
 <section>
-  <h2 class="h-full">Full <span class="count">(1)</span></h2>
+  <h2 class="h-full"><span data-i18n="full">Full</span> <span class="count">(1)</span></h2>
   <details class="op op-full">
   <summary>
     <span class="led"></span>
     <span class="method">POST</span>
     <span class="path">/products</span>
     <span class="badge">4/4</span>
-    <span class="calls">1 calls</span>
+    <span class="calls">1 <span data-i18n="calls">calls</span></span>
   </summary>
-  <ul class="conditions"><li class="cov"><span class="mark">●</span> HTTP status 201</li><li class="cov"><span class="mark">●</span> only declared status</li><li class="cov"><span class="mark">●</span> not empty body request</li><li class="cov"><span class="mark">●</span> «title» is not empty</li></ul>
+  <ul class="conditions"><li class="cov"><span class="mark">●</span> <span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;201&quot;}">HTTP status 201</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.notEmptyBody">not empty body request</span></li><li class="cov"><span class="mark">●</span> <span data-i18n="cond.propNotEmpty" data-i18n-args="{&quot;name&quot;:&quot;title&quot;}">«title» is not empty</span></li></ul>
 </details>
 </section>
-<section><h2>Tags</h2>
-  <table class="tags"><thead><tr><th>Tags</th><th>Full</th><th>Partial</th><th>Empty</th><th>operations</th></tr></thead>
+<section><h2><span data-i18n="tags">Tags</span></h2>
+  <table class="tags"><thead><tr><th><span data-i18n="tags">Tags</span></th><th><span data-i18n="full">Full</span></th><th><span data-i18n="partial">Partial</span></th><th><span data-i18n="empty">Empty</span></th><th><span data-i18n="operations">operations</span></th></tr></thead>
   <tbody><tr><td>categories</td><td class="full">0</td><td class="partial">0</td><td class="empty">1</td><td>1</td></tr><tr><td>products</td><td class="full">1</td><td class="partial">1</td><td class="empty">0</td><td>2</td></tr></tbody></table></section>
-<section><h2>Conditions by type</h2>
-  <table class="tags"><thead><tr><th>type</th><th>Covered</th><th>Total</th><th>%</th></tr></thead>
+<section><h2><span data-i18n="conditionTypes">Conditions by type</span></h2>
+  <table class="tags"><thead><tr><th>type</th><th><span data-i18n="covered">Covered</span></th><th><span data-i18n="total">Total</span></th><th>%</th></tr></thead>
   <tbody><tr><td>enum-all-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>enum-another-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>not-empty-body</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>only-declared-response-field</td><td>0</td><td>1</td><td>0%</td></tr><tr><td>only-declared-status</td><td>2</td><td>3</td><td>66.667%</td></tr><tr><td>parameter-not-empty</td><td>2</td><td>2</td><td>100%</td></tr><tr><td>property-not-empty</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>status</td><td>3</td><td>4</td><td>75%</td></tr></tbody></table></section>
-<section><h2>Never called <span class="count">(1)</span></h2>
+<section><h2><span data-i18n="zeroCall">Never called</span> <span class="count">(1)</span></h2>
   <ul class="missed"><li>GET /categories</li></ul></section>
-<section><h2>Missed calls <span class="count">(1)</span></h2>
+<section><h2><span data-i18n="missed">Missed calls</span> <span class="count">(1)</span></h2>
   <ul class="missed"><li>GET /api/v1/legacy <span class="muted">×1</span></li></ul></section>
-<section><h2>Generation</h2>
-  <table class="tags"><tbody><tr><td>Spec source</td><td>openapi.json</td></tr><tr><td>Coverage files</td><td>—</td></tr><tr><td>Recorded calls</td><td>5</td></tr><tr><td>Generated</td><td>2026-01-01T00:00:00.000Z</td></tr></tbody></table></section>
+<section><h2><span data-i18n="generation">Generation</span></h2>
+  <table class="tags"><tbody><tr><td><span data-i18n="specSource">Spec source</span></td><td>openapi.json</td></tr><tr><td><span data-i18n="filesRead">Coverage files</span></td><td>—</td></tr><tr><td><span data-i18n="callsRecorded">Recorded calls</span></td><td>5</td></tr><tr><td><span data-i18n="generated">Generated</span></td><td>2026-01-01T00:00:00.000Z</td></tr></tbody></table></section>
 </main>
+<script>
+(function(){
+  var I18N={"en":{"title":"Swagger Coverage Report","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"Отчёт о покрытии Swagger","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
+  var SPEC="Snapshot Shop";
+  var SEP=SPEC?SPEC+" — ":"";
+  function fmt(tpl,args){return tpl.replace(/\{(\w+)\}/g,function(_,k){return args&&args[k]!=null?args[k]:"{"+k+"}";});}
+  function apply(loc){
+    var dict=I18N[loc];
+    if(!dict)return;
+    document.documentElement.lang=loc;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var k=el.getAttribute("data-i18n");
+      if(dict[k]==null)return;
+      var a=el.getAttribute("data-i18n-args"),args=null;
+      if(a){try{args=JSON.parse(a);}catch(e){}}
+      el.textContent=args?fmt(dict[k],args):dict[k];
+    });
+    document.title=SEP+(dict.title||"");
+    document.querySelectorAll("[data-lang]").forEach(function(b){
+      b.classList.toggle("active",b.getAttribute("data-lang")===loc);
+    });
+    try{localStorage.setItem("pw-radar-locale",loc);}catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("[data-lang]");
+    if(b)apply(b.getAttribute("data-lang"));
+  });
+  var saved;try{saved=localStorage.getItem("pw-radar-locale");}catch(e){}
+  if(saved&&saved!=="en")apply(saved);
+})();
+</script>
 </body>
 </html>

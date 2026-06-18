@@ -4,9 +4,16 @@ export type OperationCoverageState = "full" | "partial" | "empty" | "deprecated"
 
 export interface ConditionResult {
   type: string;
+  /** Rendered English name (back-compat for JSON consumers). */
   name: string;
+  /** Catalog key + params for localized rendering. */
+  nameKey: string;
+  nameParams?: Record<string, string>;
   covered: boolean;
+  /** Rendered English reason (back-compat). */
   reason?: string;
+  reasonKey?: string;
+  reasonParams?: Record<string, string>;
 }
 
 export interface OperationCoverage {

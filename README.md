@@ -1,5 +1,7 @@
 # pw-radar
 
+[![npm](https://img.shields.io/npm/v/pw-radar.svg)](https://www.npmjs.com/package/pw-radar)
+
 API test coverage against an OpenAPI/Swagger specification — a TypeScript port of
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), with no JVM required.
 
@@ -72,6 +74,7 @@ Options:
   -c, --config <path>     JSON config file
   -b, --base-path <p>     Prefix recorded paths carry but the spec omits (repeatable)
   -H, --header "K: V"     HTTP header for fetching a remote spec (repeatable)
+  -l, --locale <en|ru>    Initial report language (an in-page EN/RU switcher is included)
       --validate          Validate the spec (fail on invalid) instead of parse
   -q, --quiet             No console summary
   -v, --verbose           Print warnings
@@ -80,7 +83,9 @@ Options:
 
 > **Russian docs:** see [README.ru.md](README.ru.md).
 
-Outputs `pw-radar-report.html` and `pw-radar-results.json`.
+Outputs `pw-radar-report.html` and `pw-radar-results.json`. The HTML embeds all languages
+and has an in-page **EN/RU switcher** (choice persisted in `localStorage`); `--locale` only
+sets the initial language.
 
 ### Base path
 

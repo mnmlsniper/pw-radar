@@ -1,5 +1,6 @@
 import type { RecordedCall } from "../recorder/types.js";
 import type { ParsedSpec, SpecOperation } from "./spec/model.js";
+import { tm } from "./i18n.js";
 import { createPathMatcher } from "./match/path-matcher.js";
 import { buildCallView } from "./rules/call-view.js";
 import type { Condition, ConditionRule } from "./rules/condition.js";
@@ -117,9 +118,12 @@ function toOperationCoverage(
 ): OperationCoverage {
   const conditions: ConditionResult[] = bucket.conditions.map((c) => ({
     type: c.type,
-    name: c.name,
+    name: tm("en", c.message),
+    nameKey: c.message.key,
+    ...(c.message.params ? { nameParams: c.message.params } : {}),
     covered: c.covered,
-    ...(c.reason !== undefined ? { reason: c.reason } : {}),
+    ...(c.reason ? { reason: tm("en", c.reason), reasonKey: c.reason.key } : {}),
+    ...(c.reason?.params ? { reasonParams: c.reason.params } : {}),
   }));
   const op = bucket.operation;
   return {

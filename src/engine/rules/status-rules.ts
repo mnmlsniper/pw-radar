@@ -33,7 +33,9 @@ export class HttpStatusRule implements ConditionRule {
     return operation.responseStatuses
       .filter((status) => !this.skip(status))
       .map((status) =>
-        binaryCondition(this.id, `HTTP status ${status}`, (call) => statusMatches(status, call.status)),
+        binaryCondition(this.id, { key: "cond.status", params: { status } }, (call) =>
+          statusMatches(status, call.status),
+        ),
       );
   }
 }
@@ -52,14 +54,14 @@ export class OnlyDeclaredStatusRule implements ConditionRule {
     return [
       accumulatingCondition(
         this.id,
-        "only declared status",
+        { key: "cond.onlyDeclaredStatus" },
         (call) => observed.add(call.status),
         () => {
-          if (observed.size === 0) return { covered: false, reason: "No calls — no statuses" };
+          if (observed.size === 0) return { covered: false, reason: { key: "reason.noCalls" } };
           const undeclared = [...observed].filter((s) => !statusIsDeclared(declared, s));
           return undeclared.length === 0
             ? { covered: true }
-            : { covered: false, reason: `Undeclared status: ${undeclared.join(",")}` };
+            : { covered: false, reason: { key: "reason.undeclaredStatus", params: { values: undeclared.join(",") } } };
         },
       ),
     ];
@@ -81,16 +83,16 @@ export class OnlyDeclaredResponseFieldRule implements ConditionRule {
     return [
       accumulatingCondition(
         this.id,
-        "only declared response fields",
+        { key: "cond.onlyDeclaredResponseFields" },
         (call) => {
           for (const f of call.responseProps) observed.add(f);
         },
         () => {
-          if (observed.size === 0) return { covered: false, reason: "No response fields observed" };
+          if (observed.size === 0) return { covered: false, reason: { key: "reason.noResponseFields" } };
           const undeclared = [...observed].filter((f) => !declared.has(f));
           return undeclared.length === 0
             ? { covered: true }
-            : { covered: false, reason: `Undeclared fields: ${undeclared.join(", ")}` };
+            : { covered: false, reason: { key: "reason.undeclaredFields", params: { values: undeclared.join(", ") } } };
         },
       ),
     ];
