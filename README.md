@@ -75,6 +75,7 @@ Options:
   -b, --base-path <p>     Prefix recorded paths carry but the spec omits (repeatable)
   -H, --header "K: V"     HTTP header for fetching a remote spec (repeatable)
   -l, --locale <en|ru>    Initial report language (an in-page EN/RU switcher is included)
+      --theme <name>      Initial report theme: tech (default), terminal, monochrome, cyber
       --validate          Validate the spec (fail on invalid) instead of parse
   -q, --quiet             No console summary
   -v, --verbose           Print warnings
@@ -83,9 +84,9 @@ Options:
 
 > **Russian docs:** see [README.ru.md](README.ru.md).
 
-Outputs `pw-radar-report.html` and `pw-radar-results.json`. The HTML embeds all languages
-and has an in-page **EN/RU switcher** (choice persisted in `localStorage`); `--locale` only
-sets the initial language.
+Outputs `pw-radar-report.html` and `pw-radar-results.json`. The HTML is self-contained and
+embeds all languages and themes. Runtime switchers (persisted in `localStorage`) let users
+change both; `--locale` and `--theme` only set the **initial** values on first open.
 
 ### Base path
 
@@ -111,7 +112,7 @@ Optional `swagger-coverage.config.json`:
     "empty-required-header": { "enable": false }
   },
   "writers": {
-    "html": { "filename": "report.html", "locale": "ru" },
+    "html": { "filename": "report.html", "locale": "ru", "theme": "terminal" },
     "json": { "filename": "results.json" }
   }
 }

@@ -4,6 +4,7 @@ import type { RulesConfig } from "./rules/registry.js";
 export interface WriterConfig {
   filename?: string;
   locale?: string;
+  theme?: string;
   numberFormat?: string;
 }
 

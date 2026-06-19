@@ -23,6 +23,8 @@ Options:
   -H, --header "K: V"     HTTP header for fetching a remote spec. Repeatable.
   -l, --locale <en|ru>    Initial report language (all languages are embedded;
                           a switcher is available inside the HTML).
+      --theme <name>      Initial report theme: tech (default), terminal,
+                          monochrome, cyber. All themes are embedded.
       --validate          Validate the spec (fail on invalid) instead of parse.
   -q, --quiet             Suppress console summary
   -v, --verbose           Print extra diagnostics (warnings)
@@ -56,6 +58,7 @@ async function main(argv: string[]): Promise<number> {
         "base-path": { type: "string", short: "b", multiple: true },
         header: { type: "string", short: "H", multiple: true },
         locale: { type: "string", short: "l" },
+        theme: { type: "string" },
         validate: { type: "boolean" },
         quiet: { type: "boolean", short: "q" },
         verbose: { type: "boolean", short: "v" },
@@ -110,6 +113,7 @@ async function main(argv: string[]): Promise<number> {
     const htmlName = writeHtmlReport(results, {
       filename: config.writers.html?.filename ?? DEFAULT_HTML_FILENAME,
       locale: localeChoice === "ru" ? "ru" : "en",
+      theme: values.theme ?? config.writers.html?.theme,
       numberFormat: config.writers.html?.numberFormat,
     });
 

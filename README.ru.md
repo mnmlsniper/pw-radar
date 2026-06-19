@@ -75,15 +75,16 @@ npx pw-radar -s openapi.yaml -i coverage-output
   -b, --base-path <p>     Префикс, который есть в записях, но не в спеке (можно несколько)
   -H, --header "K: V"     HTTP-заголовок для загрузки удалённой спеки (можно несколько)
   -l, --locale <en|ru>    Начальный язык отчёта (в HTML встроен переключатель EN/RU)
+      --theme <name>      Начальная тема: tech (по умолчанию), terminal, monochrome, cyber
       --validate          Валидировать спеку (падать на невалидной), а не просто парсить
   -q, --quiet             Без сводки в консоль
   -v, --verbose           Печатать предупреждения
   -h, --help
 ```
 
-На выходе — `pw-radar-report.html` и `pw-radar-results.json`. В HTML зашиты все языки и есть
-встроенный **переключатель EN/RU** (выбор запоминается в `localStorage`); `--locale` задаёт
-лишь начальный язык.
+На выходе — `pw-radar-report.html` и `pw-radar-results.json`. HTML самодостаточен: все языки
+и темы зашиты внутрь. Переключатели в футере сохраняют выбор в `localStorage`; `--locale`
+и `--theme` задают лишь начальные значения при первом открытии.
 
 ### Базовый путь
 
@@ -117,7 +118,7 @@ npx pw-radar -s https://host/openapi.json -i coverage-output \
     "empty-required-header": { "enable": false }
   },
   "writers": {
-    "html": { "filename": "report.html", "locale": "ru", "numberFormat": "0.##" },
+    "html": { "filename": "report.html", "locale": "ru", "theme": "terminal", "numberFormat": "0.##" },
     "json": { "filename": "results.json" }
   }
 }

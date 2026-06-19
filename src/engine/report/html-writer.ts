@@ -15,6 +15,8 @@ export interface HtmlWriterOptions {
   filename?: string;
   /** Initial language; all languages are embedded with a runtime switcher. */
   locale?: Locale;
+  /** Initial theme key (e.g. "tech", "terminal", "monochrome", "cyber"). All themes are embedded. */
+  theme?: string;
   /** Percentage display pattern, e.g. "0.##" (default "0.###"). */
   numberFormat?: string;
 }
@@ -220,29 +222,16 @@ body{font-family:var(--font-body);margin:0;background:var(--bg);color:var(--ink)
   background-image:var(--bg-image);background-size:var(--bg-size)}
 
 /* header */
-header{background:var(--bg);color:var(--ink);border-bottom:3px solid var(--line);
-  padding:16px 22px 20px;position:sticky;top:0;z-index:10}
-.header-main{display:flex;justify-content:space-between;align-items:baseline;
-  flex-wrap:wrap;gap:16px;margin-bottom:16px}
-header h1{font-size:2.2rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin:0}
-.language-switcher{font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--soft);display:flex;align-items:center;gap:6px;cursor:pointer}
-.language-switcher [data-lang]{color:var(--soft);cursor:pointer}
-.language-switcher [data-lang].active{color:var(--ink);font-weight:700}
-.language-switcher [data-lang]:hover{color:var(--ink)}
-.ls-sep{color:var(--soft);font-weight:400}
-.theme-switcher{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding:10px;
-  background:var(--card);border:2px solid var(--line)}
-.theme-btn{padding:6px 10px;font-family:var(--font-body);font-size:.7rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:.05em;background:var(--bg);color:var(--ink);
-  border:2px solid var(--line);cursor:pointer;white-space:nowrap;transition:all .15s}
-.theme-btn:hover{background:var(--ink);color:var(--bg);transform:translateY(-1px)}
-.theme-btn.active{background:var(--ink);color:var(--bg);box-shadow:2px 2px 0 var(--line)}
-.breadcrumbs{display:flex;gap:8px;flex-wrap:wrap;font-size:.85rem;align-items:center}
-.breadcrumbs a{color:var(--method-col);text-decoration:none;font-weight:600;
-  border-bottom:1px solid transparent;transition:border-color .2s}
-.breadcrumbs a:hover{border-bottom:1px solid var(--line)}
-.breadcrumbs span{color:var(--soft);font-weight:400}
+header{background:var(--bg);color:var(--ink);border-bottom:2px solid var(--line);
+  padding:14px 22px;display:flex;justify-content:space-between;align-items:baseline;
+  flex-wrap:wrap;gap:16px;position:sticky;top:0;z-index:10}
+.header-brand{font-size:1.4rem;font-weight:700;text-transform:lowercase;letter-spacing:.02em;white-space:nowrap}
+.header-brand::before{content:'◉ ';font-size:.9em;opacity:.7}
+.header-nav{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:.08em}
+.header-nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.header-nav a:hover{border-bottom:1px solid var(--line)}
+.header-nav .sep{color:var(--soft);font-weight:400}
 
 /* layout */
 main{max-width:1100px;margin:0 auto;padding:24px 24px 60px}
@@ -252,7 +241,7 @@ section{margin-bottom:48px}
 h2{font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
   margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--line);
   display:flex;align-items:center;gap:10px}
-h2::before{content:"";display:inline-block;width:8px;height:8px;background:var(--ink);flex-shrink:0}
+h2::before{content:'/';color:var(--soft);font-weight:400;flex-shrink:0}
 .sec-num{color:var(--soft);font-weight:400;font-size:.85em}
 .muted{color:var(--soft)}
 
@@ -317,10 +306,20 @@ td.full{color:var(--full)}td.partial{color:var(--partial)}td.empty{color:var(--e
 .list-block li:last-child{border-bottom:none}
 
 /* footer */
-footer{margin-top:40px;padding:14px 22px;border-top:3px solid var(--line);
-  font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft);
-  display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
-  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
+  font-family:var(--font-body)}
+.footer-controls{display:flex;flex-wrap:wrap;gap:24px;align-items:center;
+  margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
+.control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.control-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--soft);margin-right:4px}
+.theme-btn,.lang-btn{padding:4px 10px;font-family:var(--font-body);font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.05em;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);cursor:pointer;transition:all .15s}
+.theme-btn:hover,.lang-btn:hover{background:var(--ink);color:var(--bg)}
+.theme-btn.active,.lang-btn.active{background:var(--ink);color:var(--bg)}
+.footer-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
 .f-status{color:var(--full)}
 `;
 
@@ -384,18 +383,23 @@ function themeScript(): string {
 }
 
 /** Renders a self-contained HTML report with an in-page language switcher. */
-export function renderHtml(results: CoverageResults, locale: Locale = "en", numberFormat = "0.###"): string {
+export function renderHtml(results: CoverageResults, locale: Locale = "en", numberFormat = "0.###", initialTheme = ""): string {
   const loc: Locale = MESSAGES[locale] ? locale : "en";
 
   const headTitle = MESSAGES[loc].title;
 
-  const langSpans = (Object.keys(MESSAGES) as Locale[])
-    .map((l) => `<span data-lang="${l}"${l === loc ? ' class="active"' : ""}>${l.toUpperCase()}</span>`)
-    .join('<span class="ls-sep">/</span>');
-
-  const themeButtons = Object.keys(THEMES)
-    .map((t, i) => `<button data-theme="${t}"${i === 0 ? ' class="active"' : ""}>${t.toUpperCase()}</button>`)
+  const langButtons = (Object.keys(MESSAGES) as Locale[])
+    .map((l) => `<button class="lang-btn${l === loc ? " active" : ""}" data-lang="${l}">${l.toUpperCase()}</button>`)
     .join("");
+
+  const activeTheme = THEMES[initialTheme] ? initialTheme : Object.keys(THEMES)[0];
+  const themeButtons = Object.keys(THEMES)
+    .map((t) => `<button class="theme-btn${t === activeTheme ? " active" : ""}" data-theme="${t}">${t.toUpperCase()}</button>`)
+    .join("");
+  const themeVars = Object.entries(THEMES[activeTheme])
+    .map(([k, v]) => `${k}:${v}`)
+    .join(";");
+  const themeInit = `<style>:root{${themeVars}}</style>`;
 
   const opGroups = STATE_ORDER.map((s) => operationGroup(s, results, loc)).filter(Boolean).join("\n");
   const body = [
@@ -418,7 +422,7 @@ export function renderHtml(results: CoverageResults, locale: Locale = "en", numb
   ];
   const nav = navItems
     .map(([href, key], i) =>
-      `${i > 0 ? "<span>/</span>" : ""}<a href="${href}">${msgSpan(loc, key)}</a>`,
+      `${i > 0 ? '<span class="sep">/</span>' : ""}<a href="${href}">${msgSpan(loc, key)}</a>`,
     )
     .join("");
 
@@ -429,22 +433,31 @@ export function renderHtml(results: CoverageResults, locale: Locale = "en", numb
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(headTitle)}</title>
 <style>${STYLE}</style>
+${themeInit}
 </head>
 <body>
 <header>
-  <div class="header-main">
-    <h1><span data-i18n="title">${esc(MESSAGES[loc].title)}</span></h1>
-    <div class="language-switcher">${langSpans}</div>
-  </div>
-  <div class="theme-switcher">${themeButtons}</div>
-  <nav class="breadcrumbs">${nav}</nav>
+  <div class="header-brand"><span data-i18n="title">${esc(MESSAGES[loc].title)}</span></div>
+  <nav class="header-nav">${nav}</nav>
 </header>
 <main>
 ${body}
 </main>
 <footer>
-  <div class="f-status">CONNECTION SECURE ●</div>
-  <div>SCN: 0007 · NODE: RADAR_01</div>
+  <div class="footer-controls">
+    <div class="control-group">
+      <span class="control-label">Theme</span>
+      ${themeButtons}
+    </div>
+    <div class="control-group">
+      <span class="control-label">Lang</span>
+      ${langButtons}
+    </div>
+  </div>
+  <div class="footer-status">
+    <div class="f-status">CONNECTION SECURE ●</div>
+    <div>SCN: 0007 · NODE: RADAR_01</div>
+  </div>
 </footer>
 ${i18nScript(loc, "")}
 ${themeScript()}
@@ -455,6 +468,6 @@ ${themeScript()}
 /** Renders and writes the HTML report to disk. */
 export function writeHtmlReport(results: CoverageResults, options: HtmlWriterOptions = {}): string {
   const filename = options.filename ?? DEFAULT_HTML_FILENAME;
-  writeFileSync(filename, renderHtml(results, options.locale ?? "en", options.numberFormat));
+  writeFileSync(filename, renderHtml(results, options.locale ?? "en", options.numberFormat, options.theme));
   return filename;
 }
