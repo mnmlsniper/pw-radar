@@ -11,6 +11,8 @@ export type Locale = "en" | "ru";
 export type MessageKey =
   // UI chrome
   | "title"
+  | "navSummary"
+  | "navOperations"
   | "coverage"
   | "full"
   | "partial"
@@ -58,7 +60,9 @@ export interface Message {
 
 export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
   en: {
-    title: "Swagger Coverage Report",
+    title: "radar",
+    navSummary: "Summary",
+    navOperations: "Operations",
     coverage: "coverage",
     full: "Full",
     partial: "Partial",
@@ -97,7 +101,9 @@ export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
     "reason.checkedValues": "Checked values: [{values}]",
   },
   ru: {
-    title: "Отчёт о покрытии Swagger",
+    title: "radar",
+    navSummary: "Сводка",
+    navOperations: "Операции",
     coverage: "покрытие",
     full: "Полное",
     partial: "Частичное",
