@@ -61,6 +61,56 @@ per test). Tests and service code stay untouched.
 Response **values** are never recorded (speed + privacy) — only status, content-type, and
 top-level response field *names* (for the `only-declared-response-field` rule).
 
+### Other test types — any HTTP client
+
+`recordContext` is just sugar over a framework-agnostic recorder. Anything that observed a
+`request → status` pair can feed it, so coverage isn't tied to Playwright's `request`.
+
+**Plain requests in tests (`fetch` / `axios` / `supertest` / …)** — hand the recorder what
+your client returned, then `flush()` at the end:
+
+```js
+import { createRecorder } from 'pw-radar';
+
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+const res = await fetch('https://api.demo/users/42');
+rec.record({
+  method: 'GET',
+  url: res.url,
+  status: res.status,
+  responseContentType: res.headers.get('content-type'),
+});
+
+rec.flush();   // writes one coverage file
+```
+
+**Web / UI tests (browser-driven)** — capture the requests the app makes via network events
+and feed the same recorder:
+
+```js
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+page.on('response', (res) => {
+  const req = res.request();
+  if (req.resourceType() === 'xhr' || req.resourceType() === 'fetch') {
+    rec.record({
+      method: req.method(),
+      url: res.url(),
+      status: res.status(),
+      responseContentType: res.headers()['content-type'],
+    });
+  }
+});
+
+// ... run your UI scenario (clicks, forms) ...
+rec.flush();
+```
+
+`method`, `url` and `status` are the minimum; request body, headers and response field names
+are optional and unlock the deeper rules (enums, undeclared fields). `page.request` is also an
+`APIRequestContext`, so direct API calls from a UI test can be wrapped with `recordContext`.
+
 ## 2. Build the report
 
 ```bash

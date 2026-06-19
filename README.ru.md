@@ -61,6 +61,57 @@ export const test = base.extend({
 **Значения** ответа никогда не записываются (скорость + приватность) — только статус,
 content-type и **имена** полей верхнего уровня (для правила `only-declared-response-field`).
 
+### Другие виды тестов — любой HTTP-клиент
+
+`recordContext` — лишь обёртка над фреймворк-независимым рекордером. Скормить ему можно
+всё, что видело пару `запрос → статус`, поэтому покрытие не привязано к `request` Playwright.
+
+**Просто запросы в тестах (`fetch` / `axios` / `supertest` / …)** — отдаёте рекордеру то,
+что вернул клиент, и в конце вызываете `flush()`:
+
+```js
+import { createRecorder } from 'pw-radar';
+
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+const res = await fetch('https://api.demo/users/42');
+rec.record({
+  method: 'GET',
+  url: res.url,
+  status: res.status,
+  responseContentType: res.headers.get('content-type'),
+});
+
+rec.flush();   // пишет один файл покрытия
+```
+
+**Web / UI-тесты (браузерные)** — ловите запросы приложения через network-события и
+кормите тот же рекордер:
+
+```js
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+page.on('response', (res) => {
+  const req = res.request();
+  if (req.resourceType() === 'xhr' || req.resourceType() === 'fetch') {
+    rec.record({
+      method: req.method(),
+      url: res.url(),
+      status: res.status(),
+      responseContentType: res.headers()['content-type'],
+    });
+  }
+});
+
+// ... прогоняете UI-сценарий (клики, формы) ...
+rec.flush();
+```
+
+`method`, `url` и `status` — минимум; тело запроса, заголовки и имена полей ответа
+опциональны и включают более глубокие правила (enum, недекларированные поля). `page.request`
+— это тоже `APIRequestContext`, так что прямые API-вызовы из UI-теста можно обернуть
+`recordContext`.
+
 ## 2. Сборка отчёта
 
 ```bash
