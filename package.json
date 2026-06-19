@@ -1,6 +1,6 @@
 {
   "name": "pw-radar",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "API test coverage against an OpenAPI/Swagger spec — Playwright recorder + report CLI (TypeScript port of swagger-coverage)",
   "type": "module",
   "license": "Apache-2.0",

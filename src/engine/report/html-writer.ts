@@ -459,7 +459,7 @@ ${body}
     <div>SCN: 0007 · NODE: RADAR_01</div>
   </div>
 </footer>
-${i18nScript(loc, "")}
+${i18nScript(loc, results.specTitle ?? "")}
 ${themeScript()}
 </body>
 </html>`;

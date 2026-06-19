@@ -80,10 +80,11 @@ test("renderHtml includes a generation block", () => {
 });
 
 test("numberFormat controls percentage display", () => {
-  // partialPercent is 100 here; use a fractional value to see formatting
-  const r = { ...results, summary: { ...results.summary, partialPercent: 58.824 } };
-  assert.match(renderHtml(r, "en", "0.##"), /58\.82%/);
-  assert.match(renderHtml(r, "en", "0"), /59%/);
+  // The headline coverage percentage (fullPercent) honors the format pattern.
+  // Assert on the cov-pct element so we don't match the bar-width style string.
+  const r = { ...results, summary: { ...results.summary, fullPercent: 58.824 } };
+  assert.match(renderHtml(r, "en", "0.##"), /class="cov-pct">58\.82%/);
+  assert.match(renderHtml(r, "en", "0"), /class="cov-pct">59%/);
 });
 
 test("writeJsonReport writes the model to disk", () => {
