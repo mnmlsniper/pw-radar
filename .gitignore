@@ -6,4 +6,5 @@ coverage/
 .DS_Store
 temp/
 .claude/
-docs/
+docs/**
+!docs/example-report.html
