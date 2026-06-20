@@ -1,0 +1,16 @@
+{
+  "specs": [
+    { "spec": "openapi.yaml", "basePaths": ["/api/v1"] }
+  ],
+  "excludeDeprecated": true,
+  "rules": {
+    "status": { "filter": ["200", "201", "400", "404"] },
+    "enum-another-value": { "enable": false },
+    "property-enum-another-value": { "enable": false },
+    "empty-required-header": { "enable": false }
+  },
+  "writers": {
+    "html": { "filename": "report.html", "locale": "en", "theme": "tech" },
+    "json": { "filename": "results.json" }
+  }
+}

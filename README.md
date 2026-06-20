@@ -61,6 +61,88 @@ per test). Tests and service code stay untouched.
 Response **values** are never recorded (speed + privacy) — only status, content-type, and
 top-level response field *names* (for the `only-declared-response-field` rule).
 
+### Request/response logging
+
+Enable the built-in debug logger by passing a `log` option to `recordContext`.
+It uses the same interception point as coverage recording — no extra wrapping needed.
+
+```js
+recordContext(context, {
+  log: 'summary',   // 'summary' | 'verbose' | true | LogOptions
+})
+```
+
+**`summary`** (recommended default): compact one-liner for successful calls; full detail
+(headers + body + curl) for 4xx / 5xx / thrown requests.
+
+**`verbose`**: expand everything — headers and body for every call.
+
+```
+✓ GET http://api.example.com/products/1 → 200
+✗ POST http://api.example.com/login → 401
+    headers: { "content-type": "application/json" }
+    body: { "username": "neo", "password": "tr****23" }
+    response: { "message": "Unauthorized" }
+    curl: curl -X POST 'http://api.example.com/login' -H 'content-type: application/json' -d '{"username":"neo","password":"tr****23"}'
+```
+
+All values are **masked** by default (same `sensitiveKeys` as coverage). Sensitive headers
+(Authorization, Cookie) are masked in both the log output and the generated `curl` command.
+
+Full `LogOptions`:
+
+| Option | Default | Meaning |
+|--------|---------|---------|
+| `level` | `'summary'` | `'summary'` = compact success + expanded error; `'verbose'` = expand all |
+| `onlyErrors` | `false` | log only 4xx / 5xx / thrown requests |
+| `sink` | `'console'` | `'console'` \| `'file'` \| custom `Sink` \| array of these |
+| `mask` | `true` | mask sensitive headers/body; forced `true` for file sink (CI leak guard) |
+| `maskKeys` | `[]` | extra key substrings to mask, in addition to `sensitiveKeys` |
+| `color` | TTY autodetect | force-enable/disable ANSI color in the console sink |
+| `fileFormat` | `'pretty'` | `'pretty'` \| `'jsonl'` (for the file sink) |
+| `logDir` | `'logs'` | directory for the file sink |
+
+#### Console sink
+
+Outputs to `stderr` with ANSI color (auto-disabled on non-TTY). Under parallel workers each
+line is prefixed with `[w<index>]` so you can `grep` a single worker's output. Color is
+decorative — never in file output.
+
+#### File sink
+
+Writes one file per test to `logs/`, with the worker index in the filename (e.g.
+`my-test-w2-<uuid>.log`), mirroring the same parallel-safety as `coverage-output/`. Masking
+is always on for file output regardless of the `mask` option — token leaks into CI artifacts
+are prevented by design.
+
+```js
+recordContext(context, {
+  log: { sink: 'file', fileFormat: 'jsonl', logDir: 'logs' }
+})
+```
+
+#### Custom sink (Allure, ELK, …)
+
+Any `(entry: LogEntry) => void` function or `{ write, flush? }` object works as a sink.
+Multiple sinks are supported as an array.
+
+```js
+// Allure attachment — automatically groups by test, no parallel interleaving
+recordContext(context, {
+  log: {
+    level: 'verbose',
+    sink: (entry) => {
+      allure.attachment('curl', entry.curl, 'text/plain');
+      if (entry.responseBody !== undefined)
+        allure.attachment('response', JSON.stringify(entry.responseBody, null, 2), 'application/json');
+    },
+  },
+})
+```
+
+`LogEntry` always contains a ready-to-paste `curl` field — also for **thrown requests**
+(timeout, connection refused) that never produce a response.
+
 ### Other test types — any HTTP client
 
 `recordContext` is just sugar over a framework-agnostic recorder. Anything that observed a
@@ -182,7 +264,15 @@ A single `-s` behaves exactly as before — one `report.html`, one `results.json
 
 ## Configuration
 
-Optional `swagger-coverage.config.json`:
+The config file is never auto-discovered — always pass it explicitly with `-c`:
+
+```bash
+npx pw-radar -s openapi.yaml -i coverage-output -c swagger-coverage.config.json
+```
+
+If `-c` is omitted the tool runs with built-in defaults (all rules enabled, no base-path
+stripping, HTML + JSON output). If the path is provided but the file can't be read,
+defaults apply silently. Example `swagger-coverage.config.json`:
 
 ```json
 {
