@@ -58,6 +58,12 @@ export interface CoverageFile {
 
 /** Options accepted by the recorder. */
 export interface RecorderOptions {
+  /**
+   * Request/response debug logging. Off by default. `true`/`'summary'` logs
+   * compact successes + expanded errors; `'verbose'` expands everything; an
+   * object gives full control (sinks, masking, file format). See LogConfig.
+   */
+  log?: import("./log/types.js").LogConfig;
   /** Directory to write per-test files into. Default: "coverage-output". */
   outputDir?: string;
   /**

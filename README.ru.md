@@ -1,6 +1,7 @@
 # pw-radar
 
 [![npm](https://img.shields.io/npm/v/pw-radar.svg)](https://www.npmjs.com/package/pw-radar)
+[![пример отчёта](https://img.shields.io/badge/пример-отчёт-orange)](https://mnmlsniper.github.io/pw-radar/example-report.html)
 
 Покрытие API-тестами относительно OpenAPI/Swagger-спецификации — TypeScript-порт
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), без необходимости в JVM.
@@ -60,6 +61,88 @@ export const test = base.extend({
 
 **Значения** ответа никогда не записываются (скорость + приватность) — только статус,
 content-type и **имена** полей верхнего уровня (для правила `only-declared-response-field`).
+
+### Логирование запросов и ответов
+
+Передайте опцию `log` в `recordContext` — и встроенный дебаг-логгер заработает.
+Та же точка перехвата, что и у записи покрытия: ничего дополнительно оборачивать не нужно.
+
+```js
+recordContext(context, {
+  log: 'summary',   // 'summary' | 'verbose' | true | LogOptions
+})
+```
+
+**`summary`** (рекомендуемый дефолт): короткая строка для успешных запросов; полный разворот
+(заголовки + тело + curl) для 4xx / 5xx / брошенных запросов.
+
+**`verbose`**: раскрывает всё — заголовки и тело для каждого запроса.
+
+```
+✓ GET http://api.example.com/products/1 → 200
+✗ POST http://api.example.com/login → 401
+    headers: { "content-type": "application/json" }
+    body: { "username": "neo", "password": "tr****23" }
+    response: { "message": "Unauthorized" }
+    curl: curl -X POST 'http://api.example.com/login' -H 'content-type: application/json' -d '{"username":"neo","password":"tr****23"}'
+```
+
+Все значения **маскируются** по умолчанию (те же `sensitiveKeys`, что и у записи покрытия).
+Чувствительные заголовки (Authorization, Cookie) маскируются и в выводе, и в `curl`.
+
+Полный `LogOptions`:
+
+| Опция | По умолчанию | Что делает |
+|-------|--------------|------------|
+| `level` | `'summary'` | `'summary'` = компактный успех + развёрнутая ошибка; `'verbose'` = разворачивать всё |
+| `onlyErrors` | `false` | логировать только 4xx / 5xx / брошенные запросы |
+| `sink` | `'console'` | `'console'` \| `'file'` \| кастомный `Sink` \| массив |
+| `mask` | `true` | маскировать чувствительные данные; для file-sink принудительно всегда |
+| `maskKeys` | `[]` | дополнительные ключи для маскировки (добавляются к `sensitiveKeys`) |
+| `color` | автодетект TTY | принудительно включить/выключить ANSI-цвет в console-sink |
+| `fileFormat` | `'pretty'` | `'pretty'` \| `'jsonl'` (для file-sink) |
+| `logDir` | `'logs'` | папка для file-sink |
+
+#### Console-sink
+
+Пишет в `stderr` с ANSI-цветом (автовыключается на non-TTY). При параллельном прогоне
+каждая строка получает префикс `[w<индекс>]` — грепаете по нужному воркеру. Цвет —
+только на экране, никогда в файлах.
+
+#### File-sink
+
+Один файл на тест в папке `logs/`, с индексом воркера в имени (например
+`my-test-w2-<uuid>.log`). Та же модель параллельной безопасности, что и у `coverage-output/`.
+Маскировка принудительно включена для файлового вывода — утечка токенов в CI-артефакты
+исключена конструктивно.
+
+```js
+recordContext(context, {
+  log: { sink: 'file', fileFormat: 'jsonl', logDir: 'logs' }
+})
+```
+
+#### Кастомный sink (Allure, ELK, …)
+
+Любая функция `(entry: LogEntry) => void` или объект `{ write, flush? }` работает как sink.
+Поддерживается массив из нескольких sink'ов одновременно.
+
+```js
+// Allure-attachment — автоматически группирует по тесту, никакой каши из воркеров
+recordContext(context, {
+  log: {
+    level: 'verbose',
+    sink: (entry) => {
+      allure.attachment('curl', entry.curl, 'text/plain');
+      if (entry.responseBody !== undefined)
+        allure.attachment('response', JSON.stringify(entry.responseBody, null, 2), 'application/json');
+    },
+  },
+})
+```
+
+В `LogEntry` всегда есть готовый `curl` — в том числе для **брошенных запросов**
+(timeout, connection refused), у которых нет ответа.
 
 ### Другие виды тестов — любой HTTP-клиент
 
@@ -189,7 +272,15 @@ npx pw-radar -s users.yaml -s orders.yaml -i coverage-output
 
 ## Конфигурация
 
-Необязательный `swagger-coverage.config.json`:
+Конфиг **никогда не ищется автоматически** — путь к нему всегда передаётся явно флагом `-c`:
+
+```bash
+npx pw-radar -s openapi.yaml -i coverage-output -c swagger-coverage.config.json
+```
+
+Если `-c` не передан, инструмент работает с дефолтами (все правила включены, без
+обрезки базового пути, HTML + JSON на выходе). Если путь передан, но файл не читается —
+дефолты применяются молча. Пример `swagger-coverage.config.json`:
 
 ```json
 {

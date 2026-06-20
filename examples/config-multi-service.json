@@ -1,0 +1,15 @@
+{
+  "specs": [
+    { "id": "users",   "spec": "users.yaml",   "basePaths": ["/api/v1"] },
+    { "id": "orders",  "spec": "orders.yaml",  "basePaths": ["/api/v1"] },
+    { "id": "catalog", "spec": "catalog.yaml", "basePaths": ["/api/v2"] }
+  ],
+  "excludeDeprecated": true,
+  "rules": {
+    "status": { "filter": ["200", "201", "400", "404", "422"] }
+  },
+  "writers": {
+    "html": { "locale": "ru", "theme": "terminal" },
+    "json": {}
+  }
+}

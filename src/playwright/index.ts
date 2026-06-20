@@ -2,6 +2,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { APIRequestContext, APIResponse } from "@playwright/test";
 import { createRecorder, type Recorder } from "../recorder/recorder.js";
 import { extractBody } from "../recorder/extract-body.js";
+import { createLogger, type Logger } from "../recorder/log/logger.js";
+import { DEFAULT_EXCLUDE_HEADERS, DEFAULT_SENSITIVE_KEYS } from "../recorder/mask.js";
 import type { RecorderOptions } from "../recorder/types.js";
 
 /** HTTP verb methods on APIRequestContext we intercept. */
@@ -23,6 +25,33 @@ function getMethod(options: unknown): string | undefined {
   return undefined;
 }
 
+/** Best-effort full response body for the logger (verbose / errors only). */
+async function responseBodyFor(
+  response: APIResponse,
+  want: boolean,
+): Promise<unknown> {
+  if (!want) return undefined;
+  try {
+    const contentType = response.headers()["content-type"] ?? "";
+    if (contentType.includes("json")) return await response.json();
+    return await response.text();
+  } catch {
+    return undefined;
+  }
+}
+
+/** Best-effort request URL from intercepted args (verb: string; fetch: string|Request). */
+function urlFromArgs(args: unknown[]): string {
+  const first = args[0];
+  if (typeof first === "string") return first;
+  if (first && typeof first === "object" && "url" in first) {
+    const u = (first as { url?: unknown }).url;
+    if (typeof u === "function") return String((u as () => unknown).call(first));
+    if (typeof u === "string") return u;
+  }
+  return "";
+}
+
 /** Best-effort: top-level field names of a JSON response (names only, no values). */
 async function responseKeys(response: APIResponse): Promise<string[] | undefined> {
   try {
@@ -42,6 +71,7 @@ async function responseKeys(response: APIResponse): Promise<string[] | undefined
 
 async function recordResponse(
   recorder: Recorder,
+  logger: Logger | null,
   method: string,
   response: APIResponse,
   options: unknown,
@@ -59,6 +89,23 @@ async function recordResponse(
     });
   } catch {
     // Recording must never break the test under any circumstance.
+  }
+
+  if (logger) {
+    try {
+      const status = response.status();
+      logger.log({
+        method,
+        url: response.url(),
+        requestHeaders: getHeaders(options),
+        requestBody: extractBody(options),
+        status,
+        responseContentType: response.headers()["content-type"] ?? null,
+        responseBody: await responseBodyFor(response, logger.needsResponseBody(status)),
+      });
+    } catch {
+      // Logging must never break the test either.
+    }
   }
 }
 
@@ -89,6 +136,15 @@ export function recordContext(
 
   const captureResponseFields = options.captureResponseFields ?? true;
 
+  const logger = createLogger(options.log, {
+    sensitiveKeys: options.sensitiveKeys ?? DEFAULT_SENSITIVE_KEYS,
+    excludeHeaders: options.excludeHeaders ?? DEFAULT_EXCLUDE_HEADERS,
+    meta: {
+      ...(workerIndex !== undefined ? { workerIndex: Number(workerIndex) } : {}),
+      ...options.meta,
+    },
+  });
+
   // Playwright's verb methods (get/post/...) delegate to fetch() internally, so
   // a call would be seen twice. This flag, scoped per async call chain, records
   // only the outermost interception — and being async-local, it stays correct
@@ -102,11 +158,37 @@ export function recordContext(
     return async (...args: unknown[]): Promise<APIResponse> => {
       const nested = inFlight.getStore() === true;
       const exec = async (): Promise<APIResponse> => {
-        const response = (await original.apply(context, args)) as APIResponse;
-        if (!nested) {
-          await recordResponse(recorder, methodFor(args), response, args[1], captureResponseFields);
+        try {
+          const response = (await original.apply(context, args)) as APIResponse;
+          if (!nested) {
+            await recordResponse(
+              recorder,
+              logger,
+              methodFor(args),
+              response,
+              args[1],
+              captureResponseFields,
+            );
+          }
+          return response;
+        } catch (err) {
+          // A thrown request (timeout, connection refused) never reaches a
+          // response — log it for debugging, then rethrow untouched.
+          if (!nested && logger) {
+            try {
+              logger.log({
+                method: methodFor(args),
+                url: urlFromArgs(args),
+                requestHeaders: getHeaders(args[1]),
+                requestBody: extractBody(args[1]),
+                error: err,
+              });
+            } catch {
+              // never mask the original error
+            }
+          }
+          throw err;
         }
-        return response;
       };
       return nested ? exec() : inFlight.run(true, exec);
     };
@@ -128,6 +210,7 @@ export function recordContext(
   if (typeof originalDispose === "function") {
     target.dispose = async (...args: unknown[]): Promise<void> => {
       recorder.flush();
+      logger?.flush();
       await originalDispose.apply(context, args);
     };
   }
@@ -142,3 +225,12 @@ export type {
   RecordedCall,
   CoverageFile,
 } from "../recorder/types.js";
+export type {
+  LogConfig,
+  LogOptions,
+  LogLevel,
+  LogEntry,
+  Sink,
+  SinkObject,
+  SinkSpec,
+} from "../recorder/log/types.js";
