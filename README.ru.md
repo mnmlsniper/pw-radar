@@ -1,5 +1,7 @@
 # pw-radar
 
+🇬🇧 [English version](README.md)
+
 [![npm](https://img.shields.io/npm/v/pw-radar.svg)](https://www.npmjs.com/package/pw-radar)
 [![пример отчёта](https://img.shields.io/badge/пример-отчёт-orange)](https://mnmlsniper.github.io/pw-radar/example-report.html)
 

@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>radar</title>
+<style>
+:root{
+  --full:#1faa59;--partial:#ba9443;--empty:#d92d1a;--deprecated:#9a958c;
+  --accent:#ff3b00;--method-col:#ff3b00;
+  --bg:#d9d7d0;--card:#f6f5f1;--ink:#171614;--line:#171614;--soft:#8a857b;
+  --bg-image:radial-gradient(#d9d7d0 1px,transparent 1px);--bg-size:7px 7px;
+  --font-body:'Helvetica Neue',Arial,sans-serif;
+  --shadow-offset:0px;--group-hd-text:#fff;
+}
+*{box-sizing:border-box}
+body{font-family:var(--font-body);margin:0;background:var(--bg);color:var(--ink);
+  background-image:var(--bg-image);background-size:var(--bg-size)}
+
+/* header */
+header{background:var(--bg);color:var(--ink);border-bottom:2px solid var(--line);
+  padding:14px 22px;display:flex;justify-content:space-between;align-items:baseline;
+  flex-wrap:wrap;gap:16px;position:sticky;top:0;z-index:10}
+.header-brand{font-size:1.4rem;font-weight:700;text-transform:lowercase;letter-spacing:.02em;white-space:nowrap}
+.header-brand::before{content:'◉ ';font-size:.9em;opacity:.7}
+.header-nav{display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem;font-weight:500;
+  text-transform:uppercase;letter-spacing:.08em}
+.header-nav a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.header-nav a:hover{border-bottom:1px solid var(--line)}
+.header-nav .sep{color:var(--soft);font-weight:400}
+
+/* layout */
+main{max-width:1100px;margin:0 auto;padding:24px 24px 60px}
+section{margin-bottom:48px}
+
+/* h2 */
+h2{font-size:1rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+h2::before{content:'/';color:var(--soft);font-weight:400;flex-shrink:0}
+.sec-num{color:var(--soft);font-weight:400;font-size:.85em}
+.muted{color:var(--soft)}
+
+/* coverage */
+.coverage-meter{background:var(--card);border:2px solid var(--line);padding:20px 24px;
+  box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--line)}
+.cov-pct{font-size:3rem;font-weight:700;line-height:1;margin-bottom:14px;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.cov-bar{height:26px;background:var(--bg);border:2px solid var(--line);margin-bottom:18px;display:flex;overflow:hidden}
+.cov-seg{height:100%}
+.cov-seg.full{background:var(--full);
+  background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,0.1) 4px,rgba(255,255,255,0.1) 8px)}
+.cov-seg.partial{background:var(--partial)}
+.status-indicators{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:10px;font-weight:600;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px}
+.status-item.full{color:var(--full)}.status-item.partial{color:var(--partial)}.status-item.empty{color:var(--empty)}
+.cov-sub{font-size:.85rem;color:var(--soft);border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.cov-sub-item{position:relative;cursor:help;border-bottom:1px dotted var(--accent);color:var(--ink)}
+.cov-sub-item:hover{color:var(--accent)}
+.cov-sub-item:hover::after{content:attr(title);position:absolute;left:0;bottom:calc(100% + 8px);
+  width:max-content;max-width:260px;white-space:normal;z-index:10;pointer-events:none;
+  background:var(--ink);color:var(--bg);border:1px solid var(--line);box-shadow:3px 3px 0 var(--line);
+  padding:6px 9px;font-size:.72rem;line-height:1.35;font-weight:500;letter-spacing:.02em;text-transform:none}
+
+/* operation groups */
+.op-group{border:2px solid var(--line);margin:0 0 20px;
+  box-shadow:var(--shadow-offset) var(--shadow-offset) 0 var(--line)}
+.op-gd{padding:10px 16px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--group-hd-text);border-bottom:2px solid var(--line);
+  display:flex;justify-content:space-between;font-size:.85rem;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.op-group.empty .op-gd{background:var(--empty)}
+.op-group.partial .op-gd{background:var(--partial)}
+.op-group.full .op-gd{background:var(--full)}
+.op-group.deprecated .op-gd{background:var(--deprecated)}
+.op-item{padding:14px 16px;border-bottom:1px solid var(--bg);
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.op-item:last-child{border-bottom:none}
+.op-hd{display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:10px;flex-wrap:wrap;gap:8px;font-size:13px}
+.method{font-weight:700;text-transform:uppercase;color:var(--method-col);margin-right:6px}
+.path{font-weight:600;color:var(--ink)}
+.op-stats{color:var(--soft);font-size:.85rem}
+.cond-list{list-style:none;padding:0;margin:0}
+.cond-list li{padding:4px 0;display:flex;align-items:flex-start;gap:8px;font-size:.9rem}
+.cond-list .cov{color:var(--full);font-weight:700}
+.cond-list .unc{color:var(--empty);font-weight:700}
+.mark{font-size:1.1rem;line-height:1;margin-top:1px;flex-shrink:0}
+.reason{color:var(--soft);font-size:.85rem;font-style:italic;margin-left:4px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;border:2px solid var(--line);margin-bottom:16px;background:var(--bg)}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:.85rem}
+th{background:var(--ink);color:var(--bg);font-weight:700;text-transform:uppercase;
+  font-size:.78rem;letter-spacing:.1em}
+tr:nth-child(even) td{background:var(--card)}
+td.full{color:var(--full)}td.partial{color:var(--partial)}td.empty{color:var(--empty)}
+
+/* never called / missed */
+.list-block{margin-bottom:16px}
+.list-block h3{font-size:.85rem;font-weight:700;margin-bottom:8px;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--soft);font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.list-block ul{list-style:none}
+.list-block li{padding:5px 0;border-bottom:1px dashed var(--line);font-size:.9rem;font-weight:500;
+  font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.list-block li:last-child{border-bottom:none}
+
+/* footer */
+footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
+  font-family:var(--font-body)}
+.footer-controls{display:flex;flex-wrap:wrap;gap:24px;align-items:center;
+  margin-bottom:16px;padding-bottom:16px;border-bottom:1px dashed var(--line)}
+.control-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.control-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--soft);margin-right:4px}
+.theme-btn,.lang-btn{padding:4px 10px;font-family:var(--font-body);font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.05em;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);cursor:pointer;transition:all .15s}
+.theme-btn:hover,.lang-btn:hover{background:var(--ink);color:var(--bg)}
+.theme-btn.active,.lang-btn.active{background:var(--ink);color:var(--bg)}
+.footer-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
+.f-status{color:var(--full)}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.footer-logo{width:18px;height:18px;color:var(--accent);flex:none}
+.footer-brand .brand-text{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+.footer-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none;letter-spacing:0;font-weight:500}
+.footer-meta a{color:var(--accent);text-decoration:none;font-weight:600}
+.footer-meta a:hover{text-decoration:underline}
+.footer-meta .dot{color:var(--soft)}
+.footer-meta .gen-time{color:var(--ink)}
+</style>
+<style>:root{--full:#1B4332;--partial:#B45309;--empty:#7F1D1D;--deprecated:#6B7280;--accent:#1D3557;--method-col:#1D3557;--bg:#FDFCF8;--card:#F0EEE5;--ink:#0A0A0A;--line:#0A0A0A;--soft:#4A4A4A;--font-body:'IBM Plex Mono','SF Mono',monospace;--bg-image:linear-gradient(rgba(10,10,10,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,10,10,0.06) 1px,transparent 1px);--bg-size:24px 24px;--shadow-offset:4px;--group-hd-text:#fff}</style>
+</head>
+<body>
+<header>
+  <div class="header-brand"><span data-i18n="title">radar</span></div>
+  <nav class="header-nav"><a href="#summary"><span data-i18n="navSummary">Summary</span></a><span class="sep">/</span><a href="#operations"><span data-i18n="navOperations">Operations</span></a><span class="sep">/</span><a href="#tags"><span data-i18n="tags">Tags</span></a><span class="sep">/</span><a href="#conditions"><span data-i18n="conditions">Conditions</span></a><span class="sep">/</span><a href="#generation"><span data-i18n="generation">Generation</span></a></nav>
+</header>
+<main>
+<section id="summary">
+<h2><span class="sec-num">01</span> <span data-i18n="coverage">coverage</span></h2>
+<div class="coverage-meter">
+  <div class="cov-pct">58.82%</div>
+  <div class="cov-bar">
+    <div class="cov-seg full" style="width:58.82%"></div>
+    <div class="cov-seg partial" style="width:17.65%"></div>
+  </div>
+  <div class="status-indicators">
+    <span class="status-item full">● <span data-i18n="full">Full</span>: 10</span>
+    <span class="status-item partial">◐ <span data-i18n="partial">Partial</span>: 3</span>
+    <span class="status-item empty">○ <span data-i18n="empty">Empty</span>: 4</span>
+  </div>
+  <div class="cov-sub"><span class="cov-sub-item" data-i18n-title="tagsHint" title="Fully-covered tags / total tags. A tag counts only when every operation under it is Full.">0/1 <span data-i18n="tags">Tags</span></span> · <span class="cov-sub-item" data-i18n-title="conditionsHint" title="Coverage conditions met / total declared across all operations.">31/49 <span data-i18n="conditions">Conditions</span></span> · <span class="cov-sub-item" data-i18n-title="operationsHint" title="Operations measured (excludes deprecated when exclude-deprecated is on).">17 <span data-i18n="operations">operations</span></span></div>
+</div>
+</section>
+<section id="operations">
+<h2><span class="sec-num">02</span> <span data-i18n="navOperations">Operations</span></h2>
+<div class="op-group empty">
+  <div class="op-gd"><span>○ <span data-i18n="empty">Empty</span> (4)</span></div>
+  <div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/users</span></div>
+    <span class="op-stats">0 <span data-i18n="calls">calls</span> · 0/3</span>
+  </div>
+  <ul class="cond-list"><li class="unc"><span class="mark">○</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.noCalls">No calls — no statuses</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.noResponseFields">No response fields observed</span></span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">POST</span><span class="path">/users</span></div>
+    <span class="op-stats">0 <span data-i18n="calls">calls</span> · 0/3</span>
+  </div>
+  <ul class="cond-list"><li class="unc"><span class="mark">○</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;201&quot;}">HTTP status 201</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.noCalls">No calls — no statuses</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.noResponseFields">No response fields observed</span></span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/users/{id}</span></div>
+    <span class="op-stats">0 <span data-i18n="calls">calls</span> · 0/3</span>
+  </div>
+  <ul class="cond-list"><li class="unc"><span class="mark">○</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.noCalls">No calls — no statuses</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.noResponseFields">No response fields observed</span></span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">PUT</span><span class="path">/users/{id}</span></div>
+    <span class="op-stats">0 <span data-i18n="calls">calls</span> · 0/3</span>
+  </div>
+  <ul class="cond-list"><li class="unc"><span class="mark">○</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.noCalls">No calls — no statuses</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.noResponseFields">No response fields observed</span></span></li></ul>
+</div>
+</div>
+<div class="op-group partial">
+  <div class="op-gd"><span>◐ <span data-i18n="partial">Partial</span> (3)</span></div>
+  <div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">POST</span><span class="path">/auth/login</span></div>
+    <span class="op-stats">2 <span data-i18n="calls">calls</span> · 1/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;201&quot;}">HTTP status 201</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.undeclaredStatus" data-i18n-args="{&quot;values&quot;:&quot;401&quot;}">Undeclared status: 401</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.undeclaredFields" data-i18n-args="{&quot;values&quot;:&quot;message, statusCode&quot;}">Undeclared fields: message, statusCode</span></span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/auth/profile</span></div>
+    <span class="op-stats">2 <span data-i18n="calls">calls</span> · 1/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.undeclaredStatus" data-i18n-args="{&quot;values&quot;:&quot;401&quot;}">Undeclared status: 401</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.undeclaredFields" data-i18n-args="{&quot;values&quot;:&quot;message, statusCode, password&quot;}">Undeclared fields: message, statusCode, password</span></span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/products/{id}</span></div>
+    <span class="op-stats">2 <span data-i18n="calls">calls</span> · 1/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span> <span class="reason"><span data-i18n="reason.undeclaredStatus" data-i18n-args="{&quot;values&quot;:&quot;400&quot;}">Undeclared status: 400</span></span></li><li class="unc"><span class="mark">○</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span> <span class="reason"><span data-i18n="reason.undeclaredFields" data-i18n-args="{&quot;values&quot;:&quot;path, timestamp, name, message&quot;}">Undeclared fields: path, timestamp, name, message</span></span></li></ul>
+</div>
+</div>
+<div class="op-group full">
+  <div class="op-gd"><span>● <span data-i18n="full">Full</span> (10)</span></div>
+  <div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/categories</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">POST</span><span class="path">/categories</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;201&quot;}">HTTP status 201</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">DELETE</span><span class="path">/categories/{id}</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 2/2</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/categories/{id}</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">PUT</span><span class="path">/categories/{id}</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/categories/{id}/products</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">GET</span><span class="path">/products</span></div>
+    <span class="op-stats">3 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">POST</span><span class="path">/products</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;201&quot;}">HTTP status 201</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">DELETE</span><span class="path">/products/{id}</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 2/2</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li></ul>
+</div>
+<div class="op-item">
+  <div class="op-hd">
+    <div><span class="method">PUT</span><span class="path">/products/{id}</span></div>
+    <span class="op-stats">1 <span data-i18n="calls">calls</span> · 3/3</span>
+  </div>
+  <ul class="cond-list"><li class="cov"><span class="mark">●</span><span data-i18n="cond.status" data-i18n-args="{&quot;status&quot;:&quot;200&quot;}">HTTP status 200</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredStatus">only declared status</span></li><li class="cov"><span class="mark">●</span><span data-i18n="cond.onlyDeclaredResponseFields">only declared response fields</span></li></ul>
+</div>
+</div>
+</section>
+<section id="tags">
+<h2><span class="sec-num">03</span> <span data-i18n="tags">Tags</span></h2>
+<table><thead><tr><th><span data-i18n="tags">Tags</span></th><th><span data-i18n="full">Full</span></th><th><span data-i18n="partial">Partial</span></th><th><span data-i18n="empty">Empty</span></th><th><span data-i18n="operations">operations</span></th></tr></thead>
+<tbody><tr><td>default</td><td class="full">10</td><td class="partial">3</td><td class="empty">4</td><td>17</td></tr></tbody></table></section>
+<section id="conditions">
+<h2><span class="sec-num">04</span> <span data-i18n="conditionTypes">Conditions by type</span></h2>
+<table><thead><tr><th>type</th><th><span data-i18n="covered">Covered</span></th><th><span data-i18n="total">Total</span></th><th>%</th></tr></thead>
+<tbody><tr><td>only-declared-response-field</td><td>8</td><td>15</td><td>53.33%</td></tr><tr><td>only-declared-status</td><td>10</td><td>17</td><td>58.82%</td></tr><tr><td>status</td><td>13</td><td>17</td><td>76.47%</td></tr></tbody></table></section>
+<section id="never-missed">
+<h2><span class="sec-num">05</span> <span data-i18n="zeroCall">Never called</span> &amp; <span data-i18n="missed">Missed calls</span></h2>
+<div class="list-block"><h3><span data-i18n="zeroCall">Never called</span> (4)</h3>
+       <ul><li>GET /users</li><li>POST /users</li><li>GET /users/{id}</li><li>PUT /users/{id}</li></ul></div></section>
+<section id="generation">
+<h2><span class="sec-num">06</span> <span data-i18n="generation">Generation</span></h2>
+<table><tbody><tr><th><span data-i18n="specSource">Spec source</span></th><td>temp/sandbox/platzi/openapi.yaml</td></tr><tr><th><span data-i18n="filesRead">Coverage files</span></th><td>13</td></tr><tr><th><span data-i18n="callsRecorded">Recorded calls</span></th><td>18</td></tr><tr><th><span data-i18n="generated">Generated</span></th><td><span data-gen="2026-06-20T14:20:14.748Z">2026-06-20T14:20:14.748Z</span></td></tr></tbody></table></section>
+</main>
+<footer>
+  <div class="footer-controls">
+    <div class="control-group">
+      <span class="control-label">Theme</span>
+      <button class="theme-btn active" data-theme="tech">TECH</button><button class="theme-btn" data-theme="terminal">TERMINAL</button><button class="theme-btn" data-theme="monochrome">MONOCHROME</button><button class="theme-btn" data-theme="cyber">CYBER</button>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Lang</span>
+      <button class="lang-btn active" data-lang="en">EN</button><button class="lang-btn" data-lang="ru">RU</button>
+    </div>
+  </div>
+  <div class="footer-status">
+    <div class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
+        <circle cx="32" cy="48" r="6" fill="currentColor"/>
+        <path d="M 20 36 A 16 16 0 0 1 44 36" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 14 28 A 24 24 0 0 1 50 28" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 8 20 A 32 32 0 0 1 56 20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-text">radar</span>
+    </div>
+    <div class="footer-meta">
+      <span class="gen-time" data-gen="2026-06-20T14:20:14.748Z">2026-06-20T14:20:14.748Z</span>
+      <span class="dot">·</span>
+      <a href="https://github.com/mnmlsniper/pw-radar" target="_blank" rel="noopener">GitHub</a>
+      <span class="dot">·</span>
+      <a href="https://t.me/mnmltch" target="_blank" rel="noopener">Telegram</a>
+      <span class="dot">·</span>
+      Made with Qwen &amp; Claude
+    </div>
+  </div>
+</footer>
+<script>
+(function(){
+  var I18N={"en":{"title":"radar","navSummary":"Summary","navOperations":"Operations","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","tagsHint":"Fully-covered tags / total tags. A tag counts only when every operation under it is Full.","conditionsHint":"Coverage conditions met / total declared across all operations.","operationsHint":"Operations measured (excludes deprecated when exclude-deprecated is on).","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","service":"Service","specFiles":"Spec files","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"radar","navSummary":"Сводка","navOperations":"Операции","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","tagsHint":"Полностью покрытых тегов / всего тегов. Тег засчитывается, только если все его операции — Full.","conditionsHint":"Выполнено условий покрытия / всего объявлено по всем операциям.","operationsHint":"Учтённых операций (без deprecated, если включён exclude-deprecated).","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","service":"Сервис","specFiles":"Файлы спек","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
+  var SPEC="Platzi Fake Store API";
+  var SEP=SPEC?SPEC+" — ":"";
+  function fmt(tpl,args){return tpl.replace(/\{(\w+)\}/g,function(_,k){return args&&args[k]!=null?args[k]:"{"+k+"}";});}
+  function apply(loc){
+    var dict=I18N[loc];
+    if(!dict)return;
+    document.documentElement.lang=loc;
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var k=el.getAttribute("data-i18n");
+      if(dict[k]==null)return;
+      var a=el.getAttribute("data-i18n-args"),args=null;
+      if(a){try{args=JSON.parse(a);}catch(e){}}
+      el.textContent=args?fmt(dict[k],args):dict[k];
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach(function(el){
+      var tk=el.getAttribute("data-i18n-title");
+      if(dict[tk]!=null)el.title=dict[tk];
+    });
+    document.title=SEP+(dict.title||"");
+    var dl=loc==="ru"?"ru-RU":"en-US";
+    document.querySelectorAll("[data-gen]").forEach(function(el){
+      var iso=el.getAttribute("data-gen");if(!iso)return;
+      try{el.textContent=new Intl.DateTimeFormat(dl,{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));}catch(e){}
+    });
+    document.querySelectorAll("[data-lang]").forEach(function(b){
+      b.classList.toggle("active",b.getAttribute("data-lang")===loc);
+    });
+    try{localStorage.setItem("pw-radar-locale",loc);}catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target.closest&&e.target.closest("[data-lang]");
+    if(b)apply(b.getAttribute("data-lang"));
+  });
+  var saved;try{saved=localStorage.getItem("pw-radar-locale");}catch(e){}
+  if(saved&&saved!=="en")apply(saved);
+})();
+</script>
+<script>
+(function(){
+  var T={"tech":{"--full":"#1B4332","--partial":"#B45309","--empty":"#7F1D1D","--deprecated":"#6B7280","--accent":"#1D3557","--method-col":"#1D3557","--bg":"#FDFCF8","--card":"#F0EEE5","--ink":"#0A0A0A","--line":"#0A0A0A","--soft":"#4A4A4A","--font-body":"'IBM Plex Mono','SF Mono',monospace","--bg-image":"linear-gradient(rgba(10,10,10,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,10,10,0.06) 1px,transparent 1px)","--bg-size":"24px 24px","--shadow-offset":"4px","--group-hd-text":"#fff"},"terminal":{"--full":"#3FB950","--partial":"#D29922","--empty":"#F85149","--deprecated":"#8B949E","--accent":"#58A6FF","--method-col":"#58A6FF","--bg":"#0D1117","--card":"#161B22","--ink":"#C9D1D9","--line":"#30363D","--soft":"#8B949E","--font-body":"'IBM Plex Mono','SF Mono',monospace","--bg-image":"linear-gradient(rgba(201,209,217,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,209,217,0.05) 1px,transparent 1px)","--bg-size":"24px 24px","--shadow-offset":"0px","--group-hd-text":"#fff"},"monochrome":{"--full":"#059669","--partial":"#D97706","--empty":"#B91C1C","--deprecated":"#9CA3AF","--accent":"#000000","--method-col":"#000000","--bg":"#FFFFFF","--card":"#F5F5F5","--ink":"#000000","--line":"#000000","--soft":"#666666","--font-body":"'IBM Plex Mono','SF Mono',monospace","--bg-image":"linear-gradient(rgba(0,0,0,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.05) 1px,transparent 1px)","--bg-size":"24px 24px","--shadow-offset":"4px","--group-hd-text":"#fff"},"cyber":{"--full":"#00FF41","--partial":"#FFEA00","--empty":"#FF003C","--deprecated":"#A0A0A0","--accent":"#8B5CF6","--method-col":"#8B5CF6","--bg":"#0F0F0F","--card":"#1A1A1A","--ink":"#FFFFFF","--line":"#FFFFFF","--soft":"#A0A0A0","--font-body":"'IBM Plex Mono','SF Mono',monospace","--bg-image":"linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px)","--bg-size":"24px 24px","--shadow-offset":"4px","--group-hd-text":"#0A0A0A"}};
+  function apply(key){
+    var t=T[key];if(!t)return;
+    var r=document.documentElement;
+    for(var tk in T)for(var v in T[tk])r.style.removeProperty(v);
+    for(var k in t)r.style.setProperty(k,t[k]);
+    document.querySelectorAll('[data-theme]').forEach(function(b){
+      b.classList.toggle('active',b.getAttribute('data-theme')===key);
+    });
+    try{localStorage.setItem('pw-radar-theme',key);}catch(e){}
+  }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-theme]');
+    if(b)apply(b.getAttribute('data-theme'));
+  });
+  var saved;try{saved=localStorage.getItem('pw-radar-theme');}catch(e){}
+  if(saved&&T[saved])apply(saved);
+})();
+</script>
+</body>
+</html>
