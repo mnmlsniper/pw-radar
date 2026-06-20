@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import type {
   CoverageResults,
+  MultiCoverageResults,
   OperationCoverage,
   OperationCoverageState,
 } from "../results.js";
@@ -199,6 +200,10 @@ ${zeroBlock}${missedBlock}</section>`;
 function generationSection(results: CoverageResults, loc: Locale): string {
   const g = results.generation;
   const rows: string[] = [];
+  if (results.specId) {
+    const label = results.specTitle ? `${results.specTitle} (${results.specId})` : results.specId;
+    rows.push(`<tr><th>${msgSpan(loc, "service")}</th><td>${esc(label)}</td></tr>`);
+  }
   if (g.specSource) rows.push(`<tr><th>${msgSpan(loc, "specSource")}</th><td>${esc(g.specSource)}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "filesRead")}</th><td>${g.fileCount ?? "—"}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "callsRecorded")}</th><td>${g.callCount}</td></tr>`);
@@ -321,6 +326,9 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 .footer-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
   font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
 .f-status{color:var(--full)}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.footer-logo{width:18px;height:18px;color:var(--accent);flex:none}
+.footer-brand .brand-text{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
 `;
 
 /** Inline runtime language switcher (self-contained, no deps). */
@@ -455,6 +463,15 @@ ${body}
     </div>
   </div>
   <div class="footer-status">
+    <div class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
+        <circle cx="32" cy="48" r="6" fill="currentColor"/>
+        <path d="M 20 36 A 16 16 0 0 1 44 36" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 14 28 A 24 24 0 0 1 50 28" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 8 20 A 32 32 0 0 1 56 20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-text">radar</span>
+    </div>
     <div class="f-status">CONNECTION SECURE ●</div>
     <div>SCN: 0007 · NODE: RADAR_01</div>
   </div>
@@ -470,4 +487,26 @@ export function writeHtmlReport(results: CoverageResults, options: HtmlWriterOpt
   const filename = options.filename ?? DEFAULT_HTML_FILENAME;
   writeFileSync(filename, renderHtml(results, options.locale ?? "en", options.numberFormat, options.theme));
   return filename;
+}
+
+/** Inserts a `-<suffix>` before the file extension: `report.html` → `report-users.html`. */
+function withSuffix(filename: string, suffix: string): string {
+  const dot = filename.lastIndexOf(".");
+  return dot === -1 ? `${filename}-${suffix}` : `${filename.slice(0, dot)}-${suffix}${filename.slice(dot)}`;
+}
+
+/**
+ * Writes the aggregate report to the base filename plus one `report-<id>.html`
+ * per spec. Returns every written path (aggregate first).
+ */
+export function writeMultiHtmlReport(
+  multi: MultiCoverageResults,
+  options: HtmlWriterOptions = {},
+): string[] {
+  const base = options.filename ?? DEFAULT_HTML_FILENAME;
+  const written = [writeHtmlReport(multi.aggregate, { ...options, filename: base })];
+  for (const spec of multi.perSpec) {
+    written.push(writeHtmlReport(spec, { ...options, filename: withSuffix(base, spec.specId ?? "spec") }));
+  }
+  return written;
 }
