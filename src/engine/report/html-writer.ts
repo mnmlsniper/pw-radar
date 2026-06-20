@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import type {
   CoverageResults,
+  MultiCoverageResults,
   OperationCoverage,
   OperationCoverageState,
 } from "../results.js";
@@ -127,14 +128,16 @@ function summaryBar(results: CoverageResults, loc: Locale, nf: string): string {
   const ts = results.tagStats;
   const tagsTotal = ts.length;
   const tagsFull = ts.filter((t) => t.full === t.total && t.total > 0).length;
+  const hint = (key: MessageKey, body: string): string =>
+    `<span class="cov-sub-item" data-i18n-title="${key}" title="${esc(MESSAGES[loc][key])}">${body}</span>`;
   const sub = [
-    tagsTotal > 0 ? `${tagsFull}/${tagsTotal} ${msgSpan(loc, "tags")}` : "",
-    `${s.conditionsCovered}/${s.conditionsTotal} ${msgSpan(loc, "conditions")}`,
-    `${s.total} ${msgSpan(loc, "operations")}`,
+    tagsTotal > 0 ? hint("tagsHint", `${tagsFull}/${tagsTotal} ${msgSpan(loc, "tags")}`) : "",
+    hint("conditionsHint", `${s.conditionsCovered}/${s.conditionsTotal} ${msgSpan(loc, "conditions")}`),
+    hint("operationsHint", `${s.total} ${msgSpan(loc, "operations")}`),
   ].filter(Boolean).join(" · ");
 
   return `<section id="summary">
-<h2><span class="sec-num">/01</span> ${msgSpan(loc, "coverage")}</h2>
+<h2><span class="sec-num">01</span> ${msgSpan(loc, "coverage")}</h2>
 <div class="coverage-meter">
   <div class="cov-pct">${formatNumber(s.fullPercent, nf)}%</div>
   <div class="cov-bar">
@@ -160,7 +163,7 @@ function tagsTable(results: CoverageResults, loc: Locale): string {
     )
     .join("");
   return `<section id="tags">
-<h2><span class="sec-num">/03</span> ${msgSpan(loc, "tags")}</h2>
+<h2><span class="sec-num">03</span> ${msgSpan(loc, "tags")}</h2>
 <table><thead><tr><th>${msgSpan(loc, "tags")}</th><th>${msgSpan(loc, "full")}</th><th>${msgSpan(loc, "partial")}</th><th>${msgSpan(loc, "empty")}</th><th>${msgSpan(loc, "operations")}</th></tr></thead>
 <tbody>${rows}</tbody></table></section>`;
 }
@@ -174,7 +177,7 @@ function conditionStatsTable(results: CoverageResults, loc: Locale, nf: string):
     })
     .join("");
   return `<section id="conditions">
-<h2><span class="sec-num">/04</span> ${msgSpan(loc, "conditionTypes")}</h2>
+<h2><span class="sec-num">04</span> ${msgSpan(loc, "conditionTypes")}</h2>
 <table><thead><tr><th>type</th><th>${msgSpan(loc, "covered")}</th><th>${msgSpan(loc, "total")}</th><th>%</th></tr></thead>
 <tbody>${rows}</tbody></table></section>`;
 }
@@ -192,19 +195,27 @@ function neverAndMissedSection(results: CoverageResults, loc: Locale): string {
        <ul>${missed.map((m) => `<li>${esc(m.method)} ${esc(m.path)} <span class="muted">×${m.count}</span></li>`).join("")}</ul></div>`
     : "";
   return `<section id="never-missed">
-<h2><span class="sec-num">/05</span> ${msgSpan(loc, "zeroCall")} &amp; ${msgSpan(loc, "missed")}</h2>
+<h2><span class="sec-num">05</span> ${msgSpan(loc, "zeroCall")} &amp; ${msgSpan(loc, "missed")}</h2>
 ${zeroBlock}${missedBlock}</section>`;
 }
 
 function generationSection(results: CoverageResults, loc: Locale): string {
   const g = results.generation;
   const rows: string[] = [];
+  if (results.specId) {
+    const label = results.specTitle ? `${results.specTitle} (${results.specId})` : results.specId;
+    rows.push(`<tr><th>${msgSpan(loc, "service")}</th><td>${esc(label)}</td></tr>`);
+  }
   if (g.specSource) rows.push(`<tr><th>${msgSpan(loc, "specSource")}</th><td>${esc(g.specSource)}</td></tr>`);
+  if (g.specSources && g.specSources.length > 0) {
+    const list = g.specSources.map((s) => esc(s)).join("<br>");
+    rows.push(`<tr><th>${msgSpan(loc, "specFiles")}</th><td>${list}</td></tr>`);
+  }
   rows.push(`<tr><th>${msgSpan(loc, "filesRead")}</th><td>${g.fileCount ?? "—"}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "callsRecorded")}</th><td>${g.callCount}</td></tr>`);
-  rows.push(`<tr><th>${msgSpan(loc, "generated")}</th><td>${esc(results.generatedAt)}</td></tr>`);
+  rows.push(`<tr><th>${msgSpan(loc, "generated")}</th><td><span data-gen="${esc(results.generatedAt)}">${esc(results.generatedAt)}</span></td></tr>`);
   return `<section id="generation">
-<h2><span class="sec-num">/06</span> ${msgSpan(loc, "generation")}</h2>
+<h2><span class="sec-num">06</span> ${msgSpan(loc, "generation")}</h2>
 <table><tbody>${rows.join("")}</tbody></table></section>`;
 }
 
@@ -260,6 +271,12 @@ h2::before{content:'/';color:var(--soft);font-weight:400;flex-shrink:0}
 .status-item.full{color:var(--full)}.status-item.partial{color:var(--partial)}.status-item.empty{color:var(--empty)}
 .cov-sub{font-size:.85rem;color:var(--soft);border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
   font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.cov-sub-item{position:relative;cursor:help;border-bottom:1px dotted var(--accent);color:var(--ink)}
+.cov-sub-item:hover{color:var(--accent)}
+.cov-sub-item:hover::after{content:attr(title);position:absolute;left:0;bottom:calc(100% + 8px);
+  width:max-content;max-width:260px;white-space:normal;z-index:10;pointer-events:none;
+  background:var(--ink);color:var(--bg);border:1px solid var(--line);box-shadow:3px 3px 0 var(--line);
+  padding:6px 9px;font-size:.72rem;line-height:1.35;font-weight:500;letter-spacing:.02em;text-transform:none}
 
 /* operation groups */
 .op-group{border:2px solid var(--line);margin:0 0 20px;
@@ -321,6 +338,14 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 .footer-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
   font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
 .f-status{color:var(--full)}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.footer-logo{width:18px;height:18px;color:var(--accent);flex:none}
+.footer-brand .brand-text{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+.footer-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none;letter-spacing:0;font-weight:500}
+.footer-meta a{color:var(--accent);text-decoration:none;font-weight:600}
+.footer-meta a:hover{text-decoration:underline}
+.footer-meta .dot{color:var(--soft)}
+.footer-meta .gen-time{color:var(--ink)}
 `;
 
 /** Inline runtime language switcher (self-contained, no deps). */
@@ -342,7 +367,16 @@ function i18nScript(initialLocale: Locale, specTitle: string): string {
       if(a){try{args=JSON.parse(a);}catch(e){}}
       el.textContent=args?fmt(dict[k],args):dict[k];
     });
+    document.querySelectorAll("[data-i18n-title]").forEach(function(el){
+      var tk=el.getAttribute("data-i18n-title");
+      if(dict[tk]!=null)el.title=dict[tk];
+    });
     document.title=SEP+(dict.title||"");
+    var dl=loc==="ru"?"ru-RU":"en-US";
+    document.querySelectorAll("[data-gen]").forEach(function(el){
+      var iso=el.getAttribute("data-gen");if(!iso)return;
+      try{el.textContent=new Intl.DateTimeFormat(dl,{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));}catch(e){}
+    });
     document.querySelectorAll("[data-lang]").forEach(function(b){
       b.classList.toggle("active",b.getAttribute("data-lang")===loc);
     });
@@ -404,7 +438,7 @@ export function renderHtml(results: CoverageResults, locale: Locale = "en", numb
   const opGroups = STATE_ORDER.map((s) => operationGroup(s, results, loc)).filter(Boolean).join("\n");
   const body = [
     summaryBar(results, loc, numberFormat),
-    opGroups ? `<section id="operations">\n<h2><span class="sec-num">/02</span> ${msgSpan(loc, "navOperations")}</h2>\n${opGroups}\n</section>` : "",
+    opGroups ? `<section id="operations">\n<h2><span class="sec-num">02</span> ${msgSpan(loc, "navOperations")}</h2>\n${opGroups}\n</section>` : "",
     tagsTable(results, loc),
     conditionStatsTable(results, loc, numberFormat),
     neverAndMissedSection(results, loc),
@@ -455,8 +489,24 @@ ${body}
     </div>
   </div>
   <div class="footer-status">
-    <div class="f-status">CONNECTION SECURE ●</div>
-    <div>SCN: 0007 · NODE: RADAR_01</div>
+    <div class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
+        <circle cx="32" cy="48" r="6" fill="currentColor"/>
+        <path d="M 20 36 A 16 16 0 0 1 44 36" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 14 28 A 24 24 0 0 1 50 28" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 8 20 A 32 32 0 0 1 56 20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-text">radar</span>
+    </div>
+    <div class="footer-meta">
+      <span class="gen-time" data-gen="${esc(results.generatedAt)}">${esc(results.generatedAt)}</span>
+      <span class="dot">·</span>
+      <a href="https://github.com/mnmlsniper/pw-radar" target="_blank" rel="noopener">GitHub</a>
+      <span class="dot">·</span>
+      <a href="https://t.me/mnmltch" target="_blank" rel="noopener">Telegram</a>
+      <span class="dot">·</span>
+      Made with Qwen &amp; Claude
+    </div>
   </div>
 </footer>
 ${i18nScript(loc, results.specTitle ?? "")}
@@ -470,4 +520,26 @@ export function writeHtmlReport(results: CoverageResults, options: HtmlWriterOpt
   const filename = options.filename ?? DEFAULT_HTML_FILENAME;
   writeFileSync(filename, renderHtml(results, options.locale ?? "en", options.numberFormat, options.theme));
   return filename;
+}
+
+/** Inserts a `-<suffix>` before the file extension: `report.html` → `report-users.html`. */
+function withSuffix(filename: string, suffix: string): string {
+  const dot = filename.lastIndexOf(".");
+  return dot === -1 ? `${filename}-${suffix}` : `${filename.slice(0, dot)}-${suffix}${filename.slice(dot)}`;
+}
+
+/**
+ * Writes the aggregate report to the base filename plus one `report-<id>.html`
+ * per spec. Returns every written path (aggregate first).
+ */
+export function writeMultiHtmlReport(
+  multi: MultiCoverageResults,
+  options: HtmlWriterOptions = {},
+): string[] {
+  const base = options.filename ?? DEFAULT_HTML_FILENAME;
+  const written = [writeHtmlReport(multi.aggregate, { ...options, filename: base })];
+  for (const spec of multi.perSpec) {
+    written.push(writeHtmlReport(spec, { ...options, filename: withSuffix(base, spec.specId ?? "spec") }));
+  }
+  return written;
 }

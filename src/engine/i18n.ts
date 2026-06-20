@@ -25,11 +25,16 @@ export type MessageKey =
   | "total"
   | "zeroCall"
   | "tags"
+  | "tagsHint"
+  | "conditionsHint"
+  | "operationsHint"
   | "missed"
   | "calls"
   | "generated"
   | "generation"
+  | "service"
   | "specSource"
+  | "specFiles"
   | "filesRead"
   | "callsRecorded"
   // condition names
@@ -75,10 +80,15 @@ export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
     total: "Total",
     zeroCall: "Never called",
     tags: "Tags",
+    tagsHint: "Fully-covered tags / total tags. A tag counts only when every operation under it is Full.",
+    conditionsHint: "Coverage conditions met / total declared across all operations.",
+    operationsHint: "Operations measured (excludes deprecated when exclude-deprecated is on).",
     missed: "Missed calls",
     calls: "calls",
     generated: "Generated",
     generation: "Generation",
+    service: "Service",
+    specFiles: "Spec files",
     specSource: "Spec source",
     filesRead: "Coverage files",
     callsRecorded: "Recorded calls",
@@ -116,10 +126,15 @@ export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
     total: "Всего",
     zeroCall: "Ни разу не вызваны",
     tags: "Теги",
+    tagsHint: "Полностью покрытых тегов / всего тегов. Тег засчитывается, только если все его операции — Full.",
+    conditionsHint: "Выполнено условий покрытия / всего объявлено по всем операциям.",
+    operationsHint: "Учтённых операций (без deprecated, если включён exclude-deprecated).",
     missed: "Невостребованные вызовы",
     calls: "вызовов",
     generated: "Сгенерировано",
     generation: "Генерация",
+    service: "Сервис",
+    specFiles: "Файлы спек",
     specSource: "Источник спеки",
     filesRead: "Файлов покрытия",
     callsRecorded: "Записано вызовов",

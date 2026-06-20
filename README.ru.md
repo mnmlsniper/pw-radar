@@ -61,6 +61,57 @@ export const test = base.extend({
 **Значения** ответа никогда не записываются (скорость + приватность) — только статус,
 content-type и **имена** полей верхнего уровня (для правила `only-declared-response-field`).
 
+### Другие виды тестов — любой HTTP-клиент
+
+`recordContext` — лишь обёртка над фреймворк-независимым рекордером. Скормить ему можно
+всё, что видело пару `запрос → статус`, поэтому покрытие не привязано к `request` Playwright.
+
+**Просто запросы в тестах (`fetch` / `axios` / `supertest` / …)** — отдаёте рекордеру то,
+что вернул клиент, и в конце вызываете `flush()`:
+
+```js
+import { createRecorder } from 'pw-radar';
+
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+const res = await fetch('https://api.demo/users/42');
+rec.record({
+  method: 'GET',
+  url: res.url,
+  status: res.status,
+  responseContentType: res.headers.get('content-type'),
+});
+
+rec.flush();   // пишет один файл покрытия
+```
+
+**Web / UI-тесты (браузерные)** — ловите запросы приложения через network-события и
+кормите тот же рекордер:
+
+```js
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+page.on('response', (res) => {
+  const req = res.request();
+  if (req.resourceType() === 'xhr' || req.resourceType() === 'fetch') {
+    rec.record({
+      method: req.method(),
+      url: res.url(),
+      status: res.status(),
+      responseContentType: res.headers()['content-type'],
+    });
+  }
+});
+
+// ... прогоняете UI-сценарий (клики, формы) ...
+rec.flush();
+```
+
+`method`, `url` и `status` — минимум; тело запроса, заголовки и имена полей ответа
+опциональны и включают более глубокие правила (enum, недекларированные поля). `page.request`
+— это тоже `APIRequestContext`, так что прямые API-вызовы из UI-теста можно обернуть
+`recordContext`.
+
 ## 2. Сборка отчёта
 
 ```bash
@@ -69,7 +120,7 @@ npx pw-radar -s openapi.yaml -i coverage-output
 
 ```
 Опции:
-  -s, --spec <путь|url>   OpenAPI/Swagger спека (обязательно)
+  -s, --spec <путь|url>   OpenAPI/Swagger спека (обязательно; можно несколько)
   -i, --input <папка>     Папка с записями покрытия (обязательно)
   -c, --config <путь>     JSON-файл конфигурации
   -b, --base-path <p>     Префикс, который есть в записях, но не в спеке (можно несколько)
@@ -104,6 +155,37 @@ npx pw-radar -s openapi.yaml -i coverage-output -b /api/v1
 npx pw-radar -s https://host/openapi.json -i coverage-output \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+### Несколько спек
+
+Микросервисы? Передайте `-s` несколько раз (или перечислите спеки в конфиге). Одной папки
+покрытия достаточно — вызовы сопоставляются со всеми спеками.
+
+```bash
+npx pw-radar -s users.yaml -s orders.yaml -i coverage-output
+```
+
+Либо в конфиге, где у каждой спеки может быть свой `id` (суффикс файла отчёта) и базовые пути:
+
+```json
+{
+  "specs": [
+    { "id": "users",  "spec": "users.yaml",  "basePaths": ["/api/v1"] },
+    { "id": "orders", "spec": "orders.yaml", "basePaths": ["/api/v1"] }
+  ]
+}
+```
+
+Вы получаете **оба среза**:
+
+- **По сервисам** (`report-<id>.html`) — каждая спека считается против *всех* записанных
+  вызовов независимо. Эндпоинт, общий для двух спек, засчитывается в обеих. Имя сервиса
+  выводится в блоке *Generation* каждого отчёта.
+- **Сводный** отчёт (`report.html` + `{ aggregate, perSpec }` в JSON) — каждый вызов
+  относится к одной спеке (приоритет: самый длинный совпавший базовый путь, тай-брейк —
+  порядок в списке), поэтому общие цифры и единый список *Missed* не задваиваются.
+
+Один `-s` работает ровно как раньше — один `report.html`, один `results.json`.
 
 ## Конфигурация
 

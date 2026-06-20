@@ -56,6 +56,12 @@ h2::before{content:'/';color:var(--soft);font-weight:400;flex-shrink:0}
 .status-item.full{color:var(--full)}.status-item.partial{color:var(--partial)}.status-item.empty{color:var(--empty)}
 .cov-sub{font-size:.85rem;color:var(--soft);border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
   font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.cov-sub-item{position:relative;cursor:help;border-bottom:1px dotted var(--accent);color:var(--ink)}
+.cov-sub-item:hover{color:var(--accent)}
+.cov-sub-item:hover::after{content:attr(title);position:absolute;left:0;bottom:calc(100% + 8px);
+  width:max-content;max-width:260px;white-space:normal;z-index:10;pointer-events:none;
+  background:var(--ink);color:var(--bg);border:1px solid var(--line);box-shadow:3px 3px 0 var(--line);
+  padding:6px 9px;font-size:.72rem;line-height:1.35;font-weight:500;letter-spacing:.02em;text-transform:none}
 
 /* operation groups */
 .op-group{border:2px solid var(--line);margin:0 0 20px;
@@ -117,6 +123,14 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 .footer-status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
   font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--soft)}
 .f-status{color:var(--full)}
+.footer-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.footer-logo{width:18px;height:18px;color:var(--accent);flex:none}
+.footer-brand .brand-text{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+.footer-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none;letter-spacing:0;font-weight:500}
+.footer-meta a{color:var(--accent);text-decoration:none;font-weight:600}
+.footer-meta a:hover{text-decoration:underline}
+.footer-meta .dot{color:var(--soft)}
+.footer-meta .gen-time{color:var(--ink)}
 </style>
 <style>:root{--full:#1B4332;--partial:#B45309;--empty:#7F1D1D;--deprecated:#6B7280;--accent:#1D3557;--method-col:#1D3557;--bg:#FDFCF8;--card:#F0EEE5;--ink:#0A0A0A;--line:#0A0A0A;--soft:#4A4A4A;--font-body:'IBM Plex Mono','SF Mono',monospace;--bg-image:linear-gradient(rgba(10,10,10,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(10,10,10,0.06) 1px,transparent 1px);--bg-size:24px 24px;--shadow-offset:4px;--group-hd-text:#fff}</style>
 </head>
@@ -127,7 +141,7 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </header>
 <main>
 <section id="summary">
-<h2><span class="sec-num">/01</span> <span data-i18n="coverage">coverage</span></h2>
+<h2><span class="sec-num">01</span> <span data-i18n="coverage">coverage</span></h2>
 <div class="coverage-meter">
   <div class="cov-pct">33.333%</div>
   <div class="cov-bar">
@@ -139,11 +153,11 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
     <span class="status-item partial">◐ <span data-i18n="partial">Partial</span>: 1</span>
     <span class="status-item empty">○ <span data-i18n="empty">Empty</span>: 1</span>
   </div>
-  <div class="cov-sub">0/2 <span data-i18n="tags">Tags</span> · 11/14 <span data-i18n="conditions">Conditions</span> · 3 <span data-i18n="operations">operations</span></div>
+  <div class="cov-sub"><span class="cov-sub-item" data-i18n-title="tagsHint" title="Fully-covered tags / total tags. A tag counts only when every operation under it is Full.">0/2 <span data-i18n="tags">Tags</span></span> · <span class="cov-sub-item" data-i18n-title="conditionsHint" title="Coverage conditions met / total declared across all operations.">11/14 <span data-i18n="conditions">Conditions</span></span> · <span class="cov-sub-item" data-i18n-title="operationsHint" title="Operations measured (excludes deprecated when exclude-deprecated is on).">3 <span data-i18n="operations">operations</span></span></div>
 </div>
 </section>
 <section id="operations">
-<h2><span class="sec-num">/02</span> <span data-i18n="navOperations">Operations</span></h2>
+<h2><span class="sec-num">02</span> <span data-i18n="navOperations">Operations</span></h2>
 <div class="op-group empty">
   <div class="op-gd"><span>○ <span data-i18n="empty">Empty</span> (1)</span></div>
   <div class="op-item">
@@ -176,21 +190,21 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </div>
 </section>
 <section id="tags">
-<h2><span class="sec-num">/03</span> <span data-i18n="tags">Tags</span></h2>
+<h2><span class="sec-num">03</span> <span data-i18n="tags">Tags</span></h2>
 <table><thead><tr><th><span data-i18n="tags">Tags</span></th><th><span data-i18n="full">Full</span></th><th><span data-i18n="partial">Partial</span></th><th><span data-i18n="empty">Empty</span></th><th><span data-i18n="operations">operations</span></th></tr></thead>
 <tbody><tr><td>categories</td><td class="full">0</td><td class="partial">0</td><td class="empty">1</td><td>1</td></tr><tr><td>products</td><td class="full">1</td><td class="partial">1</td><td class="empty">0</td><td>2</td></tr></tbody></table></section>
 <section id="conditions">
-<h2><span class="sec-num">/04</span> <span data-i18n="conditionTypes">Conditions by type</span></h2>
+<h2><span class="sec-num">04</span> <span data-i18n="conditionTypes">Conditions by type</span></h2>
 <table><thead><tr><th>type</th><th><span data-i18n="covered">Covered</span></th><th><span data-i18n="total">Total</span></th><th>%</th></tr></thead>
 <tbody><tr><td>enum-all-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>enum-another-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>not-empty-body</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>only-declared-response-field</td><td>0</td><td>1</td><td>0%</td></tr><tr><td>only-declared-status</td><td>2</td><td>3</td><td>66.667%</td></tr><tr><td>parameter-not-empty</td><td>2</td><td>2</td><td>100%</td></tr><tr><td>property-not-empty</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>status</td><td>3</td><td>4</td><td>75%</td></tr></tbody></table></section>
 <section id="never-missed">
-<h2><span class="sec-num">/05</span> <span data-i18n="zeroCall">Never called</span> &amp; <span data-i18n="missed">Missed calls</span></h2>
+<h2><span class="sec-num">05</span> <span data-i18n="zeroCall">Never called</span> &amp; <span data-i18n="missed">Missed calls</span></h2>
 <div class="list-block"><h3><span data-i18n="zeroCall">Never called</span> (1)</h3>
        <ul><li>GET /categories</li></ul></div><div class="list-block"><h3><span data-i18n="missed">Missed calls</span> (1)</h3>
        <ul><li>GET /api/v1/legacy <span class="muted">×1</span></li></ul></div></section>
 <section id="generation">
-<h2><span class="sec-num">/06</span> <span data-i18n="generation">Generation</span></h2>
-<table><tbody><tr><th><span data-i18n="specSource">Spec source</span></th><td>openapi.json</td></tr><tr><th><span data-i18n="filesRead">Coverage files</span></th><td>—</td></tr><tr><th><span data-i18n="callsRecorded">Recorded calls</span></th><td>5</td></tr><tr><th><span data-i18n="generated">Generated</span></th><td>2026-01-01T00:00:00.000Z</td></tr></tbody></table></section>
+<h2><span class="sec-num">06</span> <span data-i18n="generation">Generation</span></h2>
+<table><tbody><tr><th><span data-i18n="specSource">Spec source</span></th><td>openapi.json</td></tr><tr><th><span data-i18n="filesRead">Coverage files</span></th><td>—</td></tr><tr><th><span data-i18n="callsRecorded">Recorded calls</span></th><td>5</td></tr><tr><th><span data-i18n="generated">Generated</span></th><td><span data-gen="2026-01-01T00:00:00.000Z">2026-01-01T00:00:00.000Z</span></td></tr></tbody></table></section>
 </main>
 <footer>
   <div class="footer-controls">
@@ -204,13 +218,29 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
     </div>
   </div>
   <div class="footer-status">
-    <div class="f-status">CONNECTION SECURE ●</div>
-    <div>SCN: 0007 · NODE: RADAR_01</div>
+    <div class="footer-brand">
+      <svg class="footer-logo" viewBox="0 0 64 64" width="18" height="18" aria-hidden="true">
+        <circle cx="32" cy="48" r="6" fill="currentColor"/>
+        <path d="M 20 36 A 16 16 0 0 1 44 36" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 14 28 A 24 24 0 0 1 50 28" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M 8 20 A 32 32 0 0 1 56 20" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-text">radar</span>
+    </div>
+    <div class="footer-meta">
+      <span class="gen-time" data-gen="2026-01-01T00:00:00.000Z">2026-01-01T00:00:00.000Z</span>
+      <span class="dot">·</span>
+      <a href="https://github.com/mnmlsniper/pw-radar" target="_blank" rel="noopener">GitHub</a>
+      <span class="dot">·</span>
+      <a href="https://t.me/mnmltch" target="_blank" rel="noopener">Telegram</a>
+      <span class="dot">·</span>
+      Made with Qwen &amp; Claude
+    </div>
   </div>
 </footer>
 <script>
 (function(){
-  var I18N={"en":{"title":"radar","navSummary":"Summary","navOperations":"Operations","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"radar","navSummary":"Сводка","navOperations":"Операции","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
+  var I18N={"en":{"title":"radar","navSummary":"Summary","navOperations":"Operations","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","tagsHint":"Fully-covered tags / total tags. A tag counts only when every operation under it is Full.","conditionsHint":"Coverage conditions met / total declared across all operations.","operationsHint":"Operations measured (excludes deprecated when exclude-deprecated is on).","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","service":"Service","specFiles":"Spec files","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"radar","navSummary":"Сводка","navOperations":"Операции","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","tagsHint":"Полностью покрытых тегов / всего тегов. Тег засчитывается, только если все его операции — Full.","conditionsHint":"Выполнено условий покрытия / всего объявлено по всем операциям.","operationsHint":"Учтённых операций (без deprecated, если включён exclude-deprecated).","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","service":"Сервис","specFiles":"Файлы спек","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
   var SPEC="Snapshot Shop";
   var SEP=SPEC?SPEC+" — ":"";
   function fmt(tpl,args){return tpl.replace(/\{(\w+)\}/g,function(_,k){return args&&args[k]!=null?args[k]:"{"+k+"}";});}
@@ -225,7 +255,16 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
       if(a){try{args=JSON.parse(a);}catch(e){}}
       el.textContent=args?fmt(dict[k],args):dict[k];
     });
+    document.querySelectorAll("[data-i18n-title]").forEach(function(el){
+      var tk=el.getAttribute("data-i18n-title");
+      if(dict[tk]!=null)el.title=dict[tk];
+    });
     document.title=SEP+(dict.title||"");
+    var dl=loc==="ru"?"ru-RU":"en-US";
+    document.querySelectorAll("[data-gen]").forEach(function(el){
+      var iso=el.getAttribute("data-gen");if(!iso)return;
+      try{el.textContent=new Intl.DateTimeFormat(dl,{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));}catch(e){}
+    });
     document.querySelectorAll("[data-lang]").forEach(function(b){
       b.classList.toggle("active",b.getAttribute("data-lang")===loc);
     });

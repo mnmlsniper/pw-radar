@@ -61,6 +61,56 @@ per test). Tests and service code stay untouched.
 Response **values** are never recorded (speed + privacy) — only status, content-type, and
 top-level response field *names* (for the `only-declared-response-field` rule).
 
+### Other test types — any HTTP client
+
+`recordContext` is just sugar over a framework-agnostic recorder. Anything that observed a
+`request → status` pair can feed it, so coverage isn't tied to Playwright's `request`.
+
+**Plain requests in tests (`fetch` / `axios` / `supertest` / …)** — hand the recorder what
+your client returned, then `flush()` at the end:
+
+```js
+import { createRecorder } from 'pw-radar';
+
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+const res = await fetch('https://api.demo/users/42');
+rec.record({
+  method: 'GET',
+  url: res.url,
+  status: res.status,
+  responseContentType: res.headers.get('content-type'),
+});
+
+rec.flush();   // writes one coverage file
+```
+
+**Web / UI tests (browser-driven)** — capture the requests the app makes via network events
+and feed the same recorder:
+
+```js
+const rec = createRecorder({ outputDir: 'coverage-output' });
+
+page.on('response', (res) => {
+  const req = res.request();
+  if (req.resourceType() === 'xhr' || req.resourceType() === 'fetch') {
+    rec.record({
+      method: req.method(),
+      url: res.url(),
+      status: res.status(),
+      responseContentType: res.headers()['content-type'],
+    });
+  }
+});
+
+// ... run your UI scenario (clicks, forms) ...
+rec.flush();
+```
+
+`method`, `url` and `status` are the minimum; request body, headers and response field names
+are optional and unlock the deeper rules (enums, undeclared fields). `page.request` is also an
+`APIRequestContext`, so direct API calls from a UI test can be wrapped with `recordContext`.
+
 ## 2. Build the report
 
 ```bash
@@ -69,7 +119,7 @@ npx pw-radar -s openapi.yaml -i coverage-output
 
 ```
 Options:
-  -s, --spec <path|url>   OpenAPI/Swagger spec (required)
+  -s, --spec <path|url>   OpenAPI/Swagger spec (required; repeatable for many)
   -i, --input <dir>       Folder with recorded coverage files (required)
   -c, --config <path>     JSON config file
   -b, --base-path <p>     Prefix recorded paths carry but the spec omits (repeatable)
@@ -98,6 +148,37 @@ npx pw-radar -s openapi.yaml -i coverage-output -b /api/v1
 ```
 
 (When the spec has `servers` or `basePath`, prefixes are detected automatically.)
+
+### Multiple specs
+
+Measuring a microservice setup? Pass `-s` more than once (or list the specs in the config).
+One coverage folder is enough — calls are matched against every spec.
+
+```bash
+npx pw-radar -s users.yaml -s orders.yaml -i coverage-output
+```
+
+Or in the config, where each spec can carry its own `id` (report file suffix) and base paths:
+
+```json
+{
+  "specs": [
+    { "id": "users",  "spec": "users.yaml",  "basePaths": ["/api/v1"] },
+    { "id": "orders", "spec": "orders.yaml", "basePaths": ["/api/v1"] }
+  ]
+}
+```
+
+You get **both views**:
+
+- **Per-spec** reports (`report-<id>.html`) — each spec is measured against *all* recorded
+  calls independently. An endpoint shared by two specs counts in both. The service name is
+  shown in each report's *Generation* block.
+- An **aggregate** report (`report.html`, plus `{ aggregate, perSpec }` in the JSON) — every
+  call is routed to a single spec (longest matching base path wins, declaration order breaks
+  ties), so overall figures and the global *Missed* list never double-count.
+
+A single `-s` behaves exactly as before — one `report.html`, one `results.json`.
 
 ## Configuration
 
