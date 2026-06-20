@@ -1,6 +1,6 @@
 {
   "name": "pw-radar",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "API test coverage against an OpenAPI/Swagger spec — Playwright recorder + report CLI (TypeScript port of swagger-coverage)",
   "type": "module",
   "license": "Apache-2.0",
@@ -21,9 +21,13 @@
     "url": "git+https://github.com/mnmlsniper/pw-radar.git"
   },
   "homepage": "https://github.com/mnmlsniper/pw-radar#readme",
-  "bugs": { "url": "https://github.com/mnmlsniper/pw-radar/issues" },
+  "bugs": {
+    "url": "https://github.com/mnmlsniper/pw-radar/issues"
+  },
   "author": "mnmlsniper",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

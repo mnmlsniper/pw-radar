@@ -128,10 +128,12 @@ function summaryBar(results: CoverageResults, loc: Locale, nf: string): string {
   const ts = results.tagStats;
   const tagsTotal = ts.length;
   const tagsFull = ts.filter((t) => t.full === t.total && t.total > 0).length;
+  const hint = (key: MessageKey, body: string): string =>
+    `<span class="cov-sub-item" data-i18n-title="${key}" title="${esc(MESSAGES[loc][key])}">${body}</span>`;
   const sub = [
-    tagsTotal > 0 ? `${tagsFull}/${tagsTotal} ${msgSpan(loc, "tags")}` : "",
-    `${s.conditionsCovered}/${s.conditionsTotal} ${msgSpan(loc, "conditions")}`,
-    `${s.total} ${msgSpan(loc, "operations")}`,
+    tagsTotal > 0 ? hint("tagsHint", `${tagsFull}/${tagsTotal} ${msgSpan(loc, "tags")}`) : "",
+    hint("conditionsHint", `${s.conditionsCovered}/${s.conditionsTotal} ${msgSpan(loc, "conditions")}`),
+    hint("operationsHint", `${s.total} ${msgSpan(loc, "operations")}`),
   ].filter(Boolean).join(" · ");
 
   return `<section id="summary">
@@ -211,7 +213,7 @@ function generationSection(results: CoverageResults, loc: Locale): string {
   }
   rows.push(`<tr><th>${msgSpan(loc, "filesRead")}</th><td>${g.fileCount ?? "—"}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "callsRecorded")}</th><td>${g.callCount}</td></tr>`);
-  rows.push(`<tr><th>${msgSpan(loc, "generated")}</th><td>${esc(results.generatedAt)}</td></tr>`);
+  rows.push(`<tr><th>${msgSpan(loc, "generated")}</th><td><span data-gen="${esc(results.generatedAt)}">${esc(results.generatedAt)}</span></td></tr>`);
   return `<section id="generation">
 <h2><span class="sec-num">06</span> ${msgSpan(loc, "generation")}</h2>
 <table><tbody>${rows.join("")}</tbody></table></section>`;
@@ -269,6 +271,12 @@ h2::before{content:'/';color:var(--soft);font-weight:400;flex-shrink:0}
 .status-item.full{color:var(--full)}.status-item.partial{color:var(--partial)}.status-item.empty{color:var(--empty)}
 .cov-sub{font-size:.85rem;color:var(--soft);border-top:1px dashed var(--line);padding-top:10px;margin-top:10px;
   font-family:'SF Mono',ui-monospace,Menlo,monospace}
+.cov-sub-item{position:relative;cursor:help;border-bottom:1px dotted var(--accent);color:var(--ink)}
+.cov-sub-item:hover{color:var(--accent)}
+.cov-sub-item:hover::after{content:attr(title);position:absolute;left:0;bottom:calc(100% + 8px);
+  width:max-content;max-width:260px;white-space:normal;z-index:10;pointer-events:none;
+  background:var(--ink);color:var(--bg);border:1px solid var(--line);box-shadow:3px 3px 0 var(--line);
+  padding:6px 9px;font-size:.72rem;line-height:1.35;font-weight:500;letter-spacing:.02em;text-transform:none}
 
 /* operation groups */
 .op-group{border:2px solid var(--line);margin:0 0 20px;
@@ -333,6 +341,11 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 .footer-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
 .footer-logo{width:18px;height:18px;color:var(--accent);flex:none}
 .footer-brand .brand-text{font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+.footer-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;text-transform:none;letter-spacing:0;font-weight:500}
+.footer-meta a{color:var(--accent);text-decoration:none;font-weight:600}
+.footer-meta a:hover{text-decoration:underline}
+.footer-meta .dot{color:var(--soft)}
+.footer-meta .gen-time{color:var(--ink)}
 `;
 
 /** Inline runtime language switcher (self-contained, no deps). */
@@ -354,7 +367,16 @@ function i18nScript(initialLocale: Locale, specTitle: string): string {
       if(a){try{args=JSON.parse(a);}catch(e){}}
       el.textContent=args?fmt(dict[k],args):dict[k];
     });
+    document.querySelectorAll("[data-i18n-title]").forEach(function(el){
+      var tk=el.getAttribute("data-i18n-title");
+      if(dict[tk]!=null)el.title=dict[tk];
+    });
     document.title=SEP+(dict.title||"");
+    var dl=loc==="ru"?"ru-RU":"en-US";
+    document.querySelectorAll("[data-gen]").forEach(function(el){
+      var iso=el.getAttribute("data-gen");if(!iso)return;
+      try{el.textContent=new Intl.DateTimeFormat(dl,{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso));}catch(e){}
+    });
     document.querySelectorAll("[data-lang]").forEach(function(b){
       b.classList.toggle("active",b.getAttribute("data-lang")===loc);
     });
@@ -476,8 +498,15 @@ ${body}
       </svg>
       <span class="brand-text">radar</span>
     </div>
-    <div class="f-status">CONNECTION SECURE ●</div>
-    <div>SCN: 0007 · NODE: RADAR_01</div>
+    <div class="footer-meta">
+      <span class="gen-time" data-gen="${esc(results.generatedAt)}">${esc(results.generatedAt)}</span>
+      <span class="dot">·</span>
+      <a href="https://github.com/mnmlsniper/pw-radar" target="_blank" rel="noopener">GitHub</a>
+      <span class="dot">·</span>
+      <a href="https://t.me/mnmltch" target="_blank" rel="noopener">Telegram</a>
+      <span class="dot">·</span>
+      Made with Qwen &amp; Claude
+    </div>
   </div>
 </footer>
 ${i18nScript(loc, results.specTitle ?? "")}
