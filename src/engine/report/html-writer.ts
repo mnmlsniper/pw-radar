@@ -135,7 +135,7 @@ function summaryBar(results: CoverageResults, loc: Locale, nf: string): string {
   ].filter(Boolean).join(" · ");
 
   return `<section id="summary">
-<h2><span class="sec-num">/01</span> ${msgSpan(loc, "coverage")}</h2>
+<h2><span class="sec-num">01</span> ${msgSpan(loc, "coverage")}</h2>
 <div class="coverage-meter">
   <div class="cov-pct">${formatNumber(s.fullPercent, nf)}%</div>
   <div class="cov-bar">
@@ -161,7 +161,7 @@ function tagsTable(results: CoverageResults, loc: Locale): string {
     )
     .join("");
   return `<section id="tags">
-<h2><span class="sec-num">/03</span> ${msgSpan(loc, "tags")}</h2>
+<h2><span class="sec-num">03</span> ${msgSpan(loc, "tags")}</h2>
 <table><thead><tr><th>${msgSpan(loc, "tags")}</th><th>${msgSpan(loc, "full")}</th><th>${msgSpan(loc, "partial")}</th><th>${msgSpan(loc, "empty")}</th><th>${msgSpan(loc, "operations")}</th></tr></thead>
 <tbody>${rows}</tbody></table></section>`;
 }
@@ -175,7 +175,7 @@ function conditionStatsTable(results: CoverageResults, loc: Locale, nf: string):
     })
     .join("");
   return `<section id="conditions">
-<h2><span class="sec-num">/04</span> ${msgSpan(loc, "conditionTypes")}</h2>
+<h2><span class="sec-num">04</span> ${msgSpan(loc, "conditionTypes")}</h2>
 <table><thead><tr><th>type</th><th>${msgSpan(loc, "covered")}</th><th>${msgSpan(loc, "total")}</th><th>%</th></tr></thead>
 <tbody>${rows}</tbody></table></section>`;
 }
@@ -193,7 +193,7 @@ function neverAndMissedSection(results: CoverageResults, loc: Locale): string {
        <ul>${missed.map((m) => `<li>${esc(m.method)} ${esc(m.path)} <span class="muted">×${m.count}</span></li>`).join("")}</ul></div>`
     : "";
   return `<section id="never-missed">
-<h2><span class="sec-num">/05</span> ${msgSpan(loc, "zeroCall")} &amp; ${msgSpan(loc, "missed")}</h2>
+<h2><span class="sec-num">05</span> ${msgSpan(loc, "zeroCall")} &amp; ${msgSpan(loc, "missed")}</h2>
 ${zeroBlock}${missedBlock}</section>`;
 }
 
@@ -205,11 +205,15 @@ function generationSection(results: CoverageResults, loc: Locale): string {
     rows.push(`<tr><th>${msgSpan(loc, "service")}</th><td>${esc(label)}</td></tr>`);
   }
   if (g.specSource) rows.push(`<tr><th>${msgSpan(loc, "specSource")}</th><td>${esc(g.specSource)}</td></tr>`);
+  if (g.specSources && g.specSources.length > 0) {
+    const list = g.specSources.map((s) => esc(s)).join("<br>");
+    rows.push(`<tr><th>${msgSpan(loc, "specFiles")}</th><td>${list}</td></tr>`);
+  }
   rows.push(`<tr><th>${msgSpan(loc, "filesRead")}</th><td>${g.fileCount ?? "—"}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "callsRecorded")}</th><td>${g.callCount}</td></tr>`);
   rows.push(`<tr><th>${msgSpan(loc, "generated")}</th><td>${esc(results.generatedAt)}</td></tr>`);
   return `<section id="generation">
-<h2><span class="sec-num">/06</span> ${msgSpan(loc, "generation")}</h2>
+<h2><span class="sec-num">06</span> ${msgSpan(loc, "generation")}</h2>
 <table><tbody>${rows.join("")}</tbody></table></section>`;
 }
 
@@ -412,7 +416,7 @@ export function renderHtml(results: CoverageResults, locale: Locale = "en", numb
   const opGroups = STATE_ORDER.map((s) => operationGroup(s, results, loc)).filter(Boolean).join("\n");
   const body = [
     summaryBar(results, loc, numberFormat),
-    opGroups ? `<section id="operations">\n<h2><span class="sec-num">/02</span> ${msgSpan(loc, "navOperations")}</h2>\n${opGroups}\n</section>` : "",
+    opGroups ? `<section id="operations">\n<h2><span class="sec-num">02</span> ${msgSpan(loc, "navOperations")}</h2>\n${opGroups}\n</section>` : "",
     tagsTable(results, loc),
     conditionStatsTable(results, loc, numberFormat),
     neverAndMissedSection(results, loc),

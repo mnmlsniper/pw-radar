@@ -72,6 +72,8 @@ export interface GenerationStats {
   fileCount?: number;
   /** Spec source path/URL (set by the CLI). */
   specSource?: string;
+  /** All spec sources measured (aggregate report of a multi-spec run). */
+  specSources?: string[];
 }
 
 export interface CoverageResults {

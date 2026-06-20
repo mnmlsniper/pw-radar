@@ -31,6 +31,7 @@ export type MessageKey =
   | "generation"
   | "service"
   | "specSource"
+  | "specFiles"
   | "filesRead"
   | "callsRecorded"
   // condition names
@@ -81,6 +82,7 @@ export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
     generated: "Generated",
     generation: "Generation",
     service: "Service",
+    specFiles: "Spec files",
     specSource: "Spec source",
     filesRead: "Coverage files",
     callsRecorded: "Recorded calls",
@@ -123,6 +125,7 @@ export const MESSAGES: Record<Locale, Record<MessageKey, string>> = {
     generated: "Сгенерировано",
     generation: "Генерация",
     service: "Сервис",
+    specFiles: "Файлы спек",
     specSource: "Источник спеки",
     filesRead: "Файлов покрытия",
     callsRecorded: "Записано вызовов",

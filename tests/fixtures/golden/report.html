@@ -130,7 +130,7 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </header>
 <main>
 <section id="summary">
-<h2><span class="sec-num">/01</span> <span data-i18n="coverage">coverage</span></h2>
+<h2><span class="sec-num">01</span> <span data-i18n="coverage">coverage</span></h2>
 <div class="coverage-meter">
   <div class="cov-pct">33.333%</div>
   <div class="cov-bar">
@@ -146,7 +146,7 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </div>
 </section>
 <section id="operations">
-<h2><span class="sec-num">/02</span> <span data-i18n="navOperations">Operations</span></h2>
+<h2><span class="sec-num">02</span> <span data-i18n="navOperations">Operations</span></h2>
 <div class="op-group empty">
   <div class="op-gd"><span>○ <span data-i18n="empty">Empty</span> (1)</span></div>
   <div class="op-item">
@@ -179,20 +179,20 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </div>
 </section>
 <section id="tags">
-<h2><span class="sec-num">/03</span> <span data-i18n="tags">Tags</span></h2>
+<h2><span class="sec-num">03</span> <span data-i18n="tags">Tags</span></h2>
 <table><thead><tr><th><span data-i18n="tags">Tags</span></th><th><span data-i18n="full">Full</span></th><th><span data-i18n="partial">Partial</span></th><th><span data-i18n="empty">Empty</span></th><th><span data-i18n="operations">operations</span></th></tr></thead>
 <tbody><tr><td>categories</td><td class="full">0</td><td class="partial">0</td><td class="empty">1</td><td>1</td></tr><tr><td>products</td><td class="full">1</td><td class="partial">1</td><td class="empty">0</td><td>2</td></tr></tbody></table></section>
 <section id="conditions">
-<h2><span class="sec-num">/04</span> <span data-i18n="conditionTypes">Conditions by type</span></h2>
+<h2><span class="sec-num">04</span> <span data-i18n="conditionTypes">Conditions by type</span></h2>
 <table><thead><tr><th>type</th><th><span data-i18n="covered">Covered</span></th><th><span data-i18n="total">Total</span></th><th>%</th></tr></thead>
 <tbody><tr><td>enum-all-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>enum-another-value</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>not-empty-body</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>only-declared-response-field</td><td>0</td><td>1</td><td>0%</td></tr><tr><td>only-declared-status</td><td>2</td><td>3</td><td>66.667%</td></tr><tr><td>parameter-not-empty</td><td>2</td><td>2</td><td>100%</td></tr><tr><td>property-not-empty</td><td>1</td><td>1</td><td>100%</td></tr><tr><td>status</td><td>3</td><td>4</td><td>75%</td></tr></tbody></table></section>
 <section id="never-missed">
-<h2><span class="sec-num">/05</span> <span data-i18n="zeroCall">Never called</span> &amp; <span data-i18n="missed">Missed calls</span></h2>
+<h2><span class="sec-num">05</span> <span data-i18n="zeroCall">Never called</span> &amp; <span data-i18n="missed">Missed calls</span></h2>
 <div class="list-block"><h3><span data-i18n="zeroCall">Never called</span> (1)</h3>
        <ul><li>GET /categories</li></ul></div><div class="list-block"><h3><span data-i18n="missed">Missed calls</span> (1)</h3>
        <ul><li>GET /api/v1/legacy <span class="muted">×1</span></li></ul></div></section>
 <section id="generation">
-<h2><span class="sec-num">/06</span> <span data-i18n="generation">Generation</span></h2>
+<h2><span class="sec-num">06</span> <span data-i18n="generation">Generation</span></h2>
 <table><tbody><tr><th><span data-i18n="specSource">Spec source</span></th><td>openapi.json</td></tr><tr><th><span data-i18n="filesRead">Coverage files</span></th><td>—</td></tr><tr><th><span data-i18n="callsRecorded">Recorded calls</span></th><td>5</td></tr><tr><th><span data-i18n="generated">Generated</span></th><td>2026-01-01T00:00:00.000Z</td></tr></tbody></table></section>
 </main>
 <footer>
@@ -222,7 +222,7 @@ footer{margin-top:60px;padding-top:20px;border-top:2px solid var(--line);
 </footer>
 <script>
 (function(){
-  var I18N={"en":{"title":"radar","navSummary":"Summary","navOperations":"Operations","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","service":"Service","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"radar","navSummary":"Сводка","navOperations":"Операции","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","service":"Сервис","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
+  var I18N={"en":{"title":"radar","navSummary":"Summary","navOperations":"Operations","coverage":"coverage","full":"Full","partial":"Partial","empty":"Empty","deprecated":"Deprecated","operations":"operations","conditions":"Conditions","conditionTypes":"Conditions by type","covered":"Covered","total":"Total","zeroCall":"Never called","tags":"Tags","missed":"Missed calls","calls":"calls","generated":"Generated","generation":"Generation","service":"Service","specFiles":"Spec files","specSource":"Spec source","filesRead":"Coverage files","callsRecorded":"Recorded calls","cond.status":"HTTP status {status}","cond.onlyDeclaredStatus":"only declared status","cond.onlyDeclaredResponseFields":"only declared response fields","cond.paramNotEmpty":"{in} «{name}» is not empty","cond.headerEmpty":"header «{name}» is empty","cond.paramEnumAll":"{in} «{name}» contains all values from enum [{values}]","cond.paramEnumAnother":"{in} «{name}» contains values not only from enum","cond.notEmptyBody":"not empty body request","cond.propNotEmpty":"«{name}» is not empty","cond.propEnumAll":"«{name}» contains all values from enum [{values}]","cond.propEnumAnother":"«{name}» contains values not only from enum","reason.noCalls":"No calls — no statuses","reason.undeclaredStatus":"Undeclared status: {values}","reason.noResponseFields":"No response fields observed","reason.undeclaredFields":"Undeclared fields: {values}","reason.missedValues":"Missed values [{values}]","reason.checkedValues":"Checked values: [{values}]"},"ru":{"title":"radar","navSummary":"Сводка","navOperations":"Операции","coverage":"покрытие","full":"Полное","partial":"Частичное","empty":"Пустое","deprecated":"Устаревшие","operations":"операций","conditions":"Условия","conditionTypes":"Условия по типам","covered":"Покрыто","total":"Всего","zeroCall":"Ни разу не вызваны","tags":"Теги","missed":"Невостребованные вызовы","calls":"вызовов","generated":"Сгенерировано","generation":"Генерация","service":"Сервис","specFiles":"Файлы спек","specSource":"Источник спеки","filesRead":"Файлов покрытия","callsRecorded":"Записано вызовов","cond.status":"HTTP-статус {status}","cond.onlyDeclaredStatus":"только объявленные статусы","cond.onlyDeclaredResponseFields":"только объявленные поля ответа","cond.paramNotEmpty":"{in} «{name}» не пустой","cond.headerEmpty":"заголовок «{name}» пустой","cond.paramEnumAll":"{in} «{name}» — все значения enum [{values}]","cond.paramEnumAnother":"{in} «{name}» — значение вне enum","cond.notEmptyBody":"непустое тело запроса","cond.propNotEmpty":"«{name}» не пустой","cond.propEnumAll":"«{name}» — все значения enum [{values}]","cond.propEnumAnother":"«{name}» — значение вне enum","reason.noCalls":"Не было вызовов — нет статусов","reason.undeclaredStatus":"Недокументированный статус: {values}","reason.noResponseFields":"Поля ответа не наблюдались","reason.undeclaredFields":"Недокументированные поля: {values}","reason.missedValues":"Не покрыты значения [{values}]","reason.checkedValues":"Проверенные значения: [{values}]"}};
   var SPEC="Snapshot Shop";
   var SEP=SPEC?SPEC+" — ":"";
   function fmt(tpl,args){return tpl.replace(/\{(\w+)\}/g,function(_,k){return args&&args[k]!=null?args[k]:"{"+k+"}";});}

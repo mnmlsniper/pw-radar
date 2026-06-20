@@ -154,6 +154,7 @@ async function main(argv: string[]): Promise<number> {
       excludeDeprecated: config.excludeDeprecated,
     });
     multi.aggregate.generation.fileCount = input.fileCount;
+    multi.aggregate.generation.specSources = resolved.map((r) => `${r.spec} (${r.id})`);
     for (const spec of multi.perSpec) {
       spec.generation.fileCount = input.fileCount;
       const source = resolved.find((r) => r.id === spec.specId);
