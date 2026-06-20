@@ -1,6 +1,6 @@
 {
   "name": "pw-radar",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "API test coverage against an OpenAPI/Swagger spec — Playwright recorder + report CLI (TypeScript port of swagger-coverage)",
   "type": "module",
   "license": "Apache-2.0",
@@ -11,7 +11,13 @@
     "async",
     "testing",
     "network",
-    "pw"
+    "pw",
+    "logging",
+    "http-logging",
+    "request-logging",
+    "debug",
+    "allure",
+    "curl"
   ],
   "bin": {
     "pw-radar": "dist/cli/index.js"
