@@ -1,6 +1,7 @@
 # pw-radar
 
 [![npm](https://img.shields.io/npm/v/pw-radar.svg)](https://www.npmjs.com/package/pw-radar)
+[![example report](https://img.shields.io/badge/example-report-orange)](https://mnmlsniper.github.io/pw-radar/example-report.html)
 
 API test coverage against an OpenAPI/Swagger specification — a TypeScript port of
 [swagger-coverage](https://github.com/viclovsky/swagger-coverage), with no JVM required.
