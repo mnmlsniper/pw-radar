@@ -2,6 +2,7 @@ import type { RecordedCall } from "../recorder/types.js";
 import type { ParsedSpec, SpecOperation } from "./spec/model.js";
 import { tm } from "./i18n.js";
 import { createPathMatcher } from "./match/path-matcher.js";
+import { createRouter } from "./match/router.js";
 import { buildCallView } from "./rules/call-view.js";
 import type { Condition, ConditionRule } from "./rules/condition.js";
 import {
@@ -9,6 +10,7 @@ import {
   type ConditionTypeStat,
   type CoverageResults,
   type MissedCall,
+  type MultiCoverageResults,
   type OperationCoverage,
   type OperationCoverageState,
   type TagStat,
@@ -183,6 +185,75 @@ function summarize(operations: OperationCoverage[]): CoverageResults["summary"] 
     conditionsCovered,
     conditionsTotal,
   };
+}
+
+/** One spec to measure in a multi-spec run. */
+export interface MultiSpecInput {
+  id: string;
+  spec: ParsedSpec;
+  /** Extra base-path prefixes for this spec. */
+  basePaths: string[];
+}
+
+/**
+ * Measures several specs against one pool of calls.
+ *
+ * - **per-spec**: each spec is run against *all* calls independently, so an
+ *   endpoint shared by two specs is counted in both (honest per-contract view).
+ * - **aggregate**: every call is routed to a single spec (longest base path,
+ *   then declaration order) and coverage is computed on those routed subsets,
+ *   so overall figures and the global `missed` list never double-count.
+ */
+export function computeMultiCoverage(
+  specs: MultiSpecInput[],
+  calls: RecordedCall[],
+  rules: ConditionRule[],
+  options: ComputeOptions = {},
+): MultiCoverageResults {
+  // per-spec: full pool, independent.
+  const perSpec = specs.map((s) => {
+    const results = computeCoverage(s.spec, calls, rules, { ...options, basePaths: s.basePaths });
+    results.specId = s.id;
+    return results;
+  });
+
+  // aggregate: partition calls to one spec each, then combine.
+  const router = createRouter(specs.map((s) => ({ id: s.id, spec: s.spec, basePaths: s.basePaths })));
+  const routed = new Map<string, RecordedCall[]>(specs.map((s) => [s.id, []]));
+  const missedMap = new Map<string, MissedCall>();
+  for (const call of calls) {
+    const id = router.route(call.method, call.path);
+    if (id === null) {
+      const key = `${call.method.toUpperCase()} ${call.path}`;
+      const existing = missedMap.get(key);
+      if (existing) existing.count += 1;
+      else missedMap.set(key, { method: call.method.toUpperCase(), path: call.path, count: 1 });
+      continue;
+    }
+    routed.get(id)!.push(call);
+  }
+
+  const aggregateOps: OperationCoverage[] = [];
+  for (const s of specs) {
+    const r = computeCoverage(s.spec, routed.get(s.id)!, rules, { ...options, basePaths: s.basePaths });
+    aggregateOps.push(...r.operations);
+  }
+
+  const versions = [...new Set(specs.map((s) => s.spec.version))];
+  const aggregate: CoverageResults = {
+    specVersion: versions.join(", "),
+    generatedAt: new Date().toISOString(),
+    generation: { callCount: calls.length },
+    operations: aggregateOps,
+    missed: [...missedMap.values()].sort((a, b) =>
+      `${a.method} ${a.path}`.localeCompare(`${b.method} ${b.path}`),
+    ),
+    summary: summarize(aggregateOps),
+    conditionStats: conditionStatistics(aggregateOps),
+    tagStats: tagStatistics(aggregateOps),
+  };
+
+  return { aggregate, perSpec };
 }
 
 function conditionStatistics(operations: OperationCoverage[]): ConditionTypeStat[] {

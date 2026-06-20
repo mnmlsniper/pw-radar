@@ -76,6 +76,8 @@ export interface GenerationStats {
 
 export interface CoverageResults {
   specTitle?: string;
+  /** Stable identifier of the spec (multi-spec runs); report file suffix. */
+  specId?: string;
   specVersion: string;
   generatedAt: string;
   generation: GenerationStats;
@@ -84,4 +86,16 @@ export interface CoverageResults {
   summary: CoverageSummary;
   conditionStats: ConditionTypeStat[];
   tagStats: TagStat[];
+}
+
+/**
+ * Result of measuring several specs against one pool of calls.
+ * `perSpec` computes each spec independently against ALL calls (an endpoint
+ * shared by two specs counts in both). `aggregate` routes each call to a single
+ * spec (longest base path, then declaration order) so the overall figures and
+ * the global `missed` list never double-count.
+ */
+export interface MultiCoverageResults {
+  aggregate: CoverageResults;
+  perSpec: CoverageResults[];
 }

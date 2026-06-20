@@ -1,4 +1,5 @@
 import SwaggerParser from "@apidevtools/swagger-parser";
+import type { ResolvedSpec } from "../config.js";
 import {
   type ParsedSpec,
   type SpecBodyProperty,
@@ -407,4 +408,30 @@ export async function loadSpec(
       a.path === b.path ? a.method.localeCompare(b.method) : a.path.localeCompare(b.path),
     ),
   };
+}
+
+/** A loaded spec ready for {@link computeMultiCoverage}: id + parsed spec + base paths. */
+export interface LoadedSpec {
+  id: string;
+  spec: ParsedSpec;
+  basePaths: string[];
+}
+
+/**
+ * Loads every resolved spec in parallel. A failure is rethrown annotated with
+ * the offending spec's id and source so the user knows which one broke.
+ */
+export async function loadSpecs(
+  specs: ResolvedSpec[],
+  options: LoadSpecOptions = {},
+): Promise<LoadedSpec[]> {
+  return Promise.all(
+    specs.map(async (entry) => {
+      try {
+        return { id: entry.id, spec: await loadSpec(entry.spec, options), basePaths: entry.basePaths };
+      } catch (err) {
+        throw new Error(`Spec "${entry.id}" (${entry.spec}): ${(err as Error).message}`);
+      }
+    }),
+  );
 }
